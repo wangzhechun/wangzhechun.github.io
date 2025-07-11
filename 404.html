@@ -3,11 +3,17 @@
 <head>
     <title>页面未找到</title>
     <script>
-        // 自动重定向到主页
-        window.location.href = '/';
+        // 尝试修复problem/开头的路径
+        const path = window.location.pathname;
+        if (path.includes('problem/')) {
+            const problemId = path.split('/').pop();
+            window.location.href = `index.html#problem/${problemId}`;
+        } else {
+            window.location.href = 'index.html';
+        }
     </script>
 </head>
 <body>
-    <p>如果未自动跳转，请<a href="/">点击这里</a>返回主页</p>
+    <p>正在跳转到首页...</p>
 </body>
 </html>
