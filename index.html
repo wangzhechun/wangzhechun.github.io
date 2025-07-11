@@ -1,66 +1,135 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>我的代码评测站（Piston API版）</title>
+    <title>Woj|简易的信息竞赛平台</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.12/ace.js"></script>
     <style>
-        body { 
-            font-family: Arial, sans-serif; 
-            max-width: 800px; 
-            margin: 0 auto; 
-            padding: 20px; 
-            line-height: 1.6;
+        /* 全局样式 */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            background-color: #f5f5f5;
         }
-        #editor { 
+
+        /* 侧边栏样式 */
+        #sidebar {
+            width: 200px;
+            background-color: #2c3e50;
+            color: white;
+            height: 100vh;
+            padding: 20px;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+        }
+
+        #sidebar button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            text-align: left;
+        }
+
+        #sidebar button:hover {
+            background-color: #2980b9;
+        }
+
+        /* 主内容区 */
+        #main-content {
+            flex: 1;
+            padding: 20px;
+        }
+
+        /* 代码编辑器样式 */
+        #editor {
             width: 100%;
             height: 300px;
-            border: 1px solid #ddd;
             font-size: 16px;
-            margin: 10px 0;
+            border: 1px solid #ddd;
+            margin-top: 20px;
         }
-        button {
-            background: #4CAF50;
+
+        /* 题目列表样式 */
+        #problem-list {
+            display: none;
+            background-color: white;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .problem-item {
+            padding: 8px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+        }
+
+        .problem-item:hover {
+            background-color: #f0f0f0;
+        }
+
+        /* 运行按钮和限制提示 */
+        #run-section {
+            margin-top: 20px;
+        }
+
+        #run-button {
+            background-color: #4CAF50;
             color: white;
             border: none;
             padding: 10px 20px;
-            margin: 10px 0;
-            cursor: pointer;
             font-size: 16px;
+            cursor: pointer;
             border-radius: 4px;
         }
-        button:hover {
-            background: #45a049;
+
+        #limits {
+            margin-top: 10px;
+            color: #666;
+            font-size: 14px;
         }
+
+        /* 结果输出区 */
         #result {
             margin-top: 20px;
             padding: 15px;
-            background: #f9f9f9;
+            background-color: white;
             border-left: 4px solid #4CAF50;
             white-space: pre-wrap;
             font-family: monospace;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
-        #language {
-            padding: 8px;
-            font-size: 16px;
-            margin-bottom: 10px;
-        }
+
         .error {
             color: red;
         }
     </style>
 </head>
 <body>
-    <h1>🚀 代码评测系统（Piston API版）</h1>
-    <p>支持 C++ 和 Python 代码实时运行</p>
+    <!-- 侧边栏 -->
+    <div id="sidebar">
+        <h2>导航</h2>
+        <button onclick="showHome()">🏠 主页</button>
+        <button onclick="showProblems()">📚 题库</button>
+    </div>
 
-    <!-- 语言选择 -->
-    <select id="language">
-        <option value="cpp">C++ (GCC 10.2.0)</option>
-        <option value="python">Python (3.10.0)</option>
-    </select>
-
-    <!-- 代码编辑器 -->
-    <div id="editor">#include &lt;iostream&gt;
+    <!-- 主内容区 -->
+    <div id="main-content">
+        <!-- 主页内容 -->
+        <div id="home-page">
+            <h1>欢迎来到代码评测系统！</h1>
+            <p>这是一个支持 C++ 和 Python 代码运行的在线评测平台</p>
+            
+            <div id="editor">#include &lt;iostream&gt;
 using namespace std;
 
 int main() {
@@ -68,27 +137,94 @@ int main() {
     return 0;
 }</div>
 
-    <!-- 输入框（可选） -->
-    <h3>输入（stdin）：</h3>
-    <textarea id="stdin" rows="3" style="width:100%"></textarea>
+            <div id="run-section">
+                <select id="language">
+                    <option value="cpp">C++ (GCC 10.2.0)</option>
+                    <option value="python">Python (3.10.0)</option>
+                </select>
+                
+                <div id="limits">
+                    ⏱️ 时间限制: 5秒 | 💾 内存限制: 256MB
+                </div>
+                
+                <button id="run-button" onclick="runCode()">运行代码</button>
+            </div>
 
-    <button onclick="runCode()">运行代码</button>
-    
-    <!-- 结果显示 -->
-    <h2>运行结果：</h2>
-    <div id="result"></div>
+            <h3>输入（stdin）：</h3>
+            <textarea id="stdin" rows="3" style="width:100%"></textarea>
+
+            <h3>运行结果：</h3>
+            <div id="result"></div>
+        </div>
+
+        <!-- 题库内容（默认隐藏） -->
+        <div id="problem-list">
+            <h2>📚 题目列表</h2>
+            <div class="problem-item" onclick="loadProblem(1)">1. A+B Problem</div>
+            <div class="problem-item" onclick="loadProblem(2)">2. 斐波那契数列</div>
+            <div class="problem-item" onclick="loadProblem(3)">3. 最大公约数</div>
+        </div>
+    </div>
 
     <script>
-        // 初始化代码编辑器
+        // 初始化代码编辑器（带行号和高亮）
         const editor = ace.edit("editor");
         editor.setTheme("ace/theme/chrome");
-        editor.session.setMode("ace/mode/c_cpp"); // 默认 C++ 语法高亮
+        editor.session.setMode("ace/mode/c_cpp");
+        editor.setOptions({
+            fontSize: "14pt",
+            showLineNumbers: true,
+            showGutter: true
+        });
 
-        // 切换语言时改变语法高亮
+        // 语言切换
         document.getElementById("language").addEventListener("change", function() {
             const lang = this.value;
             editor.session.setMode(`ace/mode/${lang === "cpp" ? "c_cpp" : "python"}`);
         });
+
+        // 题目数据
+        const problems = {
+            1: {
+                title: "A+B Problem",
+                description: "输入两个整数，输出它们的和。",
+                template: "#include <iostream>\nusing namespace std;\n\nint main() {\n    int a, b;\n    cin >> a >> b;\n    cout << a + b;\n    return 0;\n}"
+            },
+            2: {
+                title: "斐波那契数列",
+                description: "输入 n，输出第 n 个斐波那契数（从1开始）。",
+                template: "#include <iostream>\nusing namespace std;\n\nint fib(int n) {\n    if (n <= 2) return 1;\n    return fib(n-1) + fib(n-2);\n}\n\nint main() {\n    int n;\n    cin >> n;\n    cout << fib(n);\n    return 0;\n}"
+            },
+            3: {
+                title: "最大公约数",
+                description: "输入两个正整数，输出它们的最大公约数。",
+                template: "#include <iostream>\nusing namespace std;\n\nint gcd(int a, int b) {\n    return b == 0 ? a : gcd(b, a % b);\n}\n\nint main() {\n    int a, b;\n    cin >> a >> b;\n    cout << gcd(a, b);\n    return 0;\n}"
+            }
+        };
+
+        // 加载题目
+        function loadProblem(id) {
+            const problem = problems[id];
+            editor.setValue(problem.template);
+            document.getElementById("stdin").value = "";
+            document.getElementById("result").innerHTML = `
+                <h3>${id}. ${problem.title}</h3>
+                <p>${problem.description}</p>
+            `;
+            showHome();
+        }
+
+        // 显示主页
+        function showHome() {
+            document.getElementById("home-page").style.display = "block";
+            document.getElementById("problem-list").style.display = "none";
+        }
+
+        // 显示题库
+        function showProblems() {
+            document.getElementById("home-page").style.display = "none";
+            document.getElementById("problem-list").style.display = "block";
+        }
 
         // 运行代码（使用 Piston API）
         async function runCode() {
@@ -111,33 +247,28 @@ int main() {
                     })
                 });
 
-                if (!response.ok) {
-                    throw new Error(`HTTP 错误！状态码: ${response.status}`);
-                }
-
                 const data = await response.json();
                 let output = "";
 
                 if (data.run.stdout) {
-                    output += `<p><strong>输出：</strong></p><pre>${data.run.stdout}</pre>`;
+                    output += `<pre>${data.run.stdout}</pre>`;
                 }
                 if (data.run.stderr) {
-                    output += `<p class="error"><strong>错误：</strong></p><pre class="error">${data.run.stderr}</pre>`;
+                    output += `<pre class="error">${data.run.stderr}</pre>`;
                 }
                 if (!data.run.stdout && !data.run.stderr) {
                     output = "<p>（无输出）</p>";
                 }
 
-                resultDiv.innerHTML = output;
+                resultDiv.innerHTML = `
+                    <h3>评测结果</h3>
+                    ${output}
+                    <p>⏱️ 运行时间: ${data.run.time || 0}s</p>
+                `;
             } catch (error) {
                 resultDiv.innerHTML = `
                     <p class="error">评测失败：${error.message}</p>
-                    <p>尝试以下操作：</p>
-                    <ul>
-                        <li>检查网络连接</li>
-                        <li>简化代码后重试</li>
-                        <li>稍后再试（API 可能临时限流）</li>
-                    </ul>
+                    <p>请检查网络连接后重试</p>
                 `;
             }
         }
