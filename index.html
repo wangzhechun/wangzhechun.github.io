@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>WOJ</title>
+    <style>
+        body { font-family: Arial; text-align: center; margin-top: 50px; }
+        textarea { width: 80%; height: 200px; margin: 20px; }
+        button { background: #0078d4; color: white; border: none; padding: 10px 20px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>简易代码评测系统</h1>
+    <p>粘贴你的 C++ 或 Python 代码，点击提交测试</p>
+    
+    <select id="language">
+        <option value="54">C++</option>
+        <option value="71">Python</option>
+    </select>
+    <textarea id="code" placeholder="#include <iostream>\nint main() { std::cout << \"Hello!\"; }"></textarea>
+    <button onclick="alert('评测功能需配置Judge0 API，后续我会教你！');">提交评测</button>
+    
+    <p id="result"></p>
+</body>
+</html>
