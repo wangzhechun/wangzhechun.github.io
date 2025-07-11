@@ -4,78 +4,174 @@
     <title>创建题目 - Woj</title>
     <style>
         body { 
-            font-family: 'Segoe UI', sans-serif; 
-            margin: 0; 
-            padding: 20px;
+            font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            margin: 0;
+            padding: 0;
             background-color: #f8f9fa;
             color: #333;
         }
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
+        
+        .sidebar {
+            width: 200px;
+            background-color: #f5efe6;
+            height: 100vh;
+            padding: 25px 20px;
+            position: fixed;
+            border-right: 1px solid #e0d6c2;
+        }
+        
+        .sidebar h2 {
+            color: #8b6b4a;
+            border-bottom: 2px solid #d4b78f;
+            padding-bottom: 12px;
+            margin-top: 0;
+        }
+        
+        .sidebar button {
+            display: block;
+            width: 100%;
+            padding: 12px 15px;
+            margin-bottom: 12px;
+            background-color: #e8d5b5;
+            color: #5a4a3a;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 15px;
+            text-align: left;
+            transition: all 0.3s;
+        }
+        
+        .sidebar button:hover {
+            background-color: #d4b78f;
+            color: white;
+        }
+        
+        .main-content {
+            margin-left: 240px;
+            padding: 30px;
+            max-width: 900px;
+        }
+        
+        .form-container {
             background: white;
             padding: 30px;
             border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 15px rgba(0,0,0,0.05);
+            border: 1px solid #eee;
         }
+        
         h1 {
             color: #8b6b4a;
             margin-top: 0;
         }
+        
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 25px;
         }
+        
         label {
             display: block;
             margin-bottom: 8px;
             font-weight: 500;
+            color: #5a4a3a;
         }
-        input, textarea, select {
+        
+        input, textarea {
             width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
+            padding: 12px;
+            border: 1px solid #e0d6c2;
+            border-radius: 6px;
             font-family: inherit;
+            font-size: 15px;
+            background-color: #f9f5f0;
         }
+        
         textarea {
-            min-height: 150px;
+            min-height: 200px;
         }
-        button {
+        
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+        
+        .save-btn {
             background-color: #d4b78f;
             color: white;
-            border: none;
             padding: 12px 25px;
+            border: none;
             border-radius: 6px;
             cursor: pointer;
             font-size: 16px;
-            margin-top: 20px;
+            transition: all 0.3s;
         }
-        button:hover {
+        
+        .save-btn:hover {
             background-color: #c0a378;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .cancel-btn {
+            background-color: #95a5a6;
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .cancel-btn:hover {
+            background-color: #7f8c8d;
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+            }
+            .main-content {
+                margin-left: 0;
+                padding: 20px;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>创建新题目</h1>
-        
-        <div class="form-group">
-            <label for="title">题目名称</label>
-            <input type="text" id="title" required placeholder="例如: A+B Problem">
+    <div class="sidebar">
+        <h2>题目管理</h2>
+        <button onclick="location.href='index.html'">← 返回主页</button>
+    </div>
+
+    <div class="main-content">
+        <div class="form-container">
+            <h1>创建新题目</h1>
+            
+            <div class="form-group">
+                <label for="title">题目名称</label>
+                <input type="text" id="title" required placeholder="例如: A+B Problem">
+            </div>
+            
+            <div class="form-group">
+                <label for="description">题目描述 (Markdown格式)</label>
+                <textarea id="description" required placeholder="## 题目描述\n输入两个整数..."></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="template">代码模板</label>
+                <textarea id="template" required placeholder="#include &lt;iostream&gt;\nusing namespace std;\n\nint main() {\n    // 你的代码\n    return 0;\n}"></textarea>
+            </div>
+            
+            <div class="button-group">
+                <button class="save-btn" onclick="saveProblem()">💾 保存题目</button>
+                <button class="cancel-btn" onclick="location.href='index.html'">✖ 取消</button>
+            </div>
         </div>
-        
-        <div class="form-group">
-            <label for="description">题目描述 (Markdown格式)</label>
-            <textarea id="description" required placeholder="## 题目描述\n输入两个整数..."></textarea>
-        </div>
-        
-        <div class="form-group">
-            <label for="template">代码模板</label>
-            <textarea id="template" required placeholder="#include <iostream>\nusing namespace std;\n\nint main() {\n    // 你的代码\n    return 0;\n}"></textarea>
-        </div>
-        
-        <button onclick="saveProblem()">保存题目</button>
-        <button onclick="location.href='index.html'" style="background: #95a5a6; margin-left: 10px;">取消</button>
     </div>
 
     <script>
@@ -95,7 +191,7 @@
             // 生成题号 (A+4位数字)
             const ids = Object.keys(problems);
             const nextNum = ids.length > 0 ? 
-                Math.max(...ids.map(id => parseInt(id.substring(1))) + 1 : 1;
+                Math.max(...ids.map(id => parseInt(id.substring(1)))) + 1 : 1;
             const newId = 'A' + nextNum.toString().padStart(4, '0');
             
             // 添加新题目
