@@ -6,49 +6,54 @@
     <style>
         /* 全局样式 */
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
             margin: 0;
             padding: 0;
             display: flex;
             background-color: #f8f9fa;
             color: #333;
+            line-height: 1.6;
         }
 
-        /* 侧边栏样式 */
+        /* 暖色系侧边栏 */
         #sidebar {
             width: 220px;
-            background-color: #2c3e50;
-            color: white;
+            background-color: #f5efe6; /* 浅米色 */
             height: 100vh;
-            padding: 20px;
-            box-shadow: 2px 0 10px rgba(0,0,0,0.2);
+            padding: 25px 20px;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
             position: fixed;
+            border-right: 1px solid #e0d6c2;
         }
 
         #sidebar h2 {
-            color: #ecf0f1;
-            border-bottom: 2px solid #3498db;
-            padding-bottom: 10px;
+            color: #8b6b4a; /* 深棕色 */
+            border-bottom: 2px solid #d4b78f; /* 浅棕色 */
+            padding-bottom: 12px;
+            margin-top: 0;
+            font-weight: 600;
         }
 
         #sidebar button {
             display: block;
             width: 100%;
-            padding: 12px;
+            padding: 12px 15px;
             margin-bottom: 12px;
-            background-color: #3498db;
-            color: white;
+            background-color: #e8d5b5; /* 浅卡其色 */
+            color: #5a4a3a; /* 深褐色 */
             border: none;
             border-radius: 6px;
             cursor: pointer;
-            font-size: 16px;
+            font-size: 15px;
             text-align: left;
             transition: all 0.3s;
+            font-weight: 500;
         }
 
         #sidebar button:hover {
-            background-color: #2980b9;
-            transform: translateX(5px);
+            background-color: #d4b78f; /* 中等棕色 */
+            color: #fff;
+            transform: translateX(3px);
         }
 
         /* 主内容区 */
@@ -56,123 +61,205 @@
             flex: 1;
             padding: 30px;
             margin-left: 260px;
+            max-width: 900px;
+        }
+
+        /* 头部标题 */
+        .header {
+            margin-bottom: 25px;
+        }
+
+        .header h1 {
+            color: #8b6b4a;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        .header p {
+            color: #a89b8a;
+            margin-top: 0;
+            font-size: 15px;
+        }
+
+        /* 题目详情区 */
+        .problem-container {
+            background-color: white;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+            border: 1px solid #eee;
+        }
+
+        .problem-title {
+            color: #8b6b4a;
+            margin-top: 0;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0e6d6;
+            font-weight: 600;
+        }
+
+        .problem-content {
+            color: #5a4a3a;
+        }
+
+        .problem-content h3 {
+            color: #8b6b4a;
+            margin-top: 20px;
+            font-size: 17px;
+        }
+
+        .problem-content pre {
+            background-color: #f9f5f0;
+            padding: 10px;
+            border-radius: 4px;
+            border-left: 3px solid #d4b78f;
         }
 
         /* 代码编辑器样式 */
+        #editor-container {
+            margin-top: 20px;
+        }
+
         #editor {
             width: 100%;
             height: 350px;
-            font-size: 16px;
-            border: 1px solid #ddd;
-            margin-top: 20px;
+            font-size: 15px;
+            border: 1px solid #e0d6c2;
             border-radius: 6px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
         }
 
-        /* 题目列表样式 */
-        #problem-list {
-            display: none;
+        /* 运行控制区 */
+        #run-controls {
             background-color: white;
             padding: 20px;
             border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
             margin-top: 20px;
-            box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+            border: 1px solid #eee;
         }
 
-        .problem-item {
-            padding: 12px;
-            border-bottom: 1px solid #eee;
-            cursor: pointer;
-            transition: all 0.2s;
+        .control-row {
             display: flex;
-            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
         }
 
-        .problem-item:hover {
-            background-color: #f0f7ff;
-            transform: translateX(5px);
-        }
-
-        .problem-id {
-            font-weight: bold;
-            color: #3498db;
-        }
-
-        /* 运行按钮和限制提示 */
-        #run-section {
-            margin-top: 25px;
-            background-color: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-
-        #run-button {
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            padding: 12px 25px;
-            font-size: 16px;
-            cursor: pointer;
-            border-radius: 6px;
-            transition: all 0.3s;
-            font-weight: bold;
-        }
-
-        #run-button:hover {
-            background-color: #3e8e41;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        #language {
+            padding: 8px 12px;
+            border-radius: 4px;
+            border: 1px solid #e0d6c2;
+            background-color: #f9f5f0;
+            color: #5a4a3a;
+            margin-right: 15px;
         }
 
         #limits {
-            margin: 15px 0;
-            color: #666;
-            font-size: 14px;
             display: flex;
             gap: 20px;
+            color: #a89b8a;
+            font-size: 14px;
+            margin: 15px 0;
         }
 
         .limit-item {
             display: flex;
             align-items: center;
-            gap: 5px;
         }
 
-        /* 结果输出区 */
-        #result {
+        #run-button {
+            background-color: #d4b78f;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            font-size: 15px;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+
+        #run-button:hover {
+            background-color: #c0a378;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        /* 输入输出区 */
+        #io-container {
             margin-top: 25px;
-            padding: 20px;
+        }
+
+        .io-section {
             background-color: white;
-            border-left: 4px solid #4CAF50;
-            white-space: pre-wrap;
-            font-family: 'Courier New', monospace;
+            padding: 20px;
             border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+            border: 1px solid #eee;
         }
 
-        .error {
-            color: #e74c3c;
+        .io-section h3 {
+            color: #8b6b4a;
+            margin-top: 0;
+            margin-bottom: 15px;
+            font-weight: 500;
         }
 
-        /* 题目详情页样式 */
-        .problem-detail {
+        #stdin, #result {
+            width: 100%;
+            padding: 12px;
+            border-radius: 4px;
+            border: 1px solid #e0d6c2;
+            font-family: 'Courier New', monospace;
+            background-color: #f9f5f0;
+            min-height: 100px;
+            box-sizing: border-box;
+        }
+
+        /* 题库列表 */
+        #problem-list {
+            display: none;
             background-color: white;
             padding: 25px;
             border-radius: 8px;
-            box-shadow: 0 2px 15px rgba(0,0,0,0.1);
-            margin-bottom: 25px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.05);
+            margin-top: 20px;
+            border: 1px solid #eee;
         }
 
-        .problem-title {
-            color: #2c3e50;
-            border-bottom: 2px solid #3498db;
-            padding-bottom: 10px;
+        #problem-list h2 {
+            color: #8b6b4a;
             margin-top: 0;
+            font-weight: 600;
         }
 
-        .problem-content {
-            line-height: 1.8;
+        .problem-item {
+            padding: 15px;
+            border-bottom: 1px solid #f0e6d6;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .problem-item:hover {
+            background-color: #f9f5f0;
+        }
+
+        .problem-id {
+            font-weight: bold;
+            color: #c0a378;
+            font-family: monospace;
+            font-size: 15px;
+            min-width: 70px;
+        }
+
+        .problem-name {
+            flex: 1;
+            color: #5a4a3a;
         }
 
         /* 响应式设计 */
@@ -181,6 +268,7 @@
                 width: 100%;
                 height: auto;
                 position: relative;
+                padding: 15px;
             }
             #main-content {
                 margin-left: 0;
@@ -201,26 +289,27 @@
     <div id="main-content">
         <!-- 主页内容 -->
         <div id="home-page">
-            <h1 style="color: #2c3e50; margin-bottom: 5px;">Woj | 简易的信息竞赛平台</h1>
-            <p style="color: #7f8c8d; margin-top: 0;">练习编程，提升算法能力</p>
+            <div class="header">
+                <h1>Woj | 简易的信息竞赛平台</h1>
+                <p>练习编程，提升算法能力</p>
+            </div>
             
-            <div id="problem-detail" class="problem-detail" style="display: none;">
+            <!-- 题目详情容器 -->
+            <div id="problem-container" class="problem-container" style="display: none;">
                 <h2 class="problem-title" id="current-problem-title"></h2>
                 <div class="problem-content" id="current-problem-content"></div>
             </div>
 
-            <div id="editor">#include &lt;iostream&gt;
-using namespace std;
+            <!-- 代码编辑器容器 -->
+            <div id="editor-container">
+                <div id="editor"></div>
+            </div>
 
-int main() {
-    cout << "欢迎使用Woj平台！";
-    return 0;
-}</div>
-
-            <div id="run-section">
-                <div style="margin-bottom: 15px;">
-                    <label for="language" style="font-weight: bold; margin-right: 10px;">选择语言：</label>
-                    <select id="language" style="padding: 8px; border-radius: 4px; border: 1px solid #ddd;">
+            <!-- 运行控制区 -->
+            <div id="run-controls">
+                <div class="control-row">
+                    <label for="language" style="margin-right: 10px;">语言：</label>
+                    <select id="language">
                         <option value="cpp">C++ (GCC 10.2.0)</option>
                         <option value="python">Python (3.10.0)</option>
                     </select>
@@ -235,48 +324,57 @@ int main() {
                 <button id="run-button" onclick="runCode()">▶️ 运行代码</button>
             </div>
 
-            <h3 style="margin-top: 25px;">输入（stdin）：</h3>
-            <textarea id="stdin" rows="4" style="width:100%; padding: 10px; border-radius: 4px; border: 1px solid #ddd;"></textarea>
-
-            <h3 style="margin-top: 25px;">运行结果：</h3>
-            <div id="result"></div>
+            <!-- 输入输出区 -->
+            <div id="io-container">
+                <div class="io-section">
+                    <h3>输入（stdin）</h3>
+                    <textarea id="stdin" rows="4" placeholder="在此输入测试数据..."></textarea>
+                </div>
+                
+                <div class="io-section">
+                    <h3>运行结果</h3>
+                    <div id="result" style="min-height: 100px;">请先编写代码并点击运行</div>
+                </div>
+            </div>
         </div>
 
         <!-- 题库内容（默认隐藏） -->
         <div id="problem-list">
-            <h2 style="color: #2c3e50;">📚 题库列表</h2>
+            <h2>📚 题库列表</h2>
             <p>点击题目开始练习</p>
             
             <div class="problem-item" onclick="loadProblem('A0001')">
                 <span class="problem-id">A0001</span>
-                <span>A+B Problem</span>
+                <span class="problem-name">A+B Problem</span>
             </div>
             <div class="problem-item" onclick="loadProblem('A0002')">
                 <span class="problem-id">A0002</span>
-                <span>斐波那契数列</span>
+                <span class="problem-name">斐波那契数列</span>
             </div>
             <div class="problem-item" onclick="loadProblem('A0003')">
                 <span class="problem-id">A0003</span>
-                <span>最大公约数</span>
+                <span class="problem-name">最大公约数</span>
             </div>
             <div class="problem-item" onclick="loadProblem('A0004')">
                 <span class="problem-id">A0004</span>
-                <span>素数判断</span>
+                <span class="problem-name">素数判断</span>
             </div>
         </div>
     </div>
 
     <script>
-        // 初始化代码编辑器（带行号和高亮）
+        // 初始化代码编辑器（空内容）
         const editor = ace.edit("editor");
         editor.setTheme("ace/theme/chrome");
         editor.session.setMode("ace/mode/c_cpp");
         editor.setOptions({
-            fontSize: "14pt",
+            fontSize: "14px",
             showLineNumbers: true,
             showGutter: true,
-            highlightActiveLine: true
+            highlightActiveLine: true,
+            highlightSelectedWord: true
         });
+        editor.setValue("", -1); // 设置为空内容
 
         // 语言切换
         document.getElementById("language").addEventListener("change", function() {
@@ -303,6 +401,9 @@ int main() {
                     
                     <h3>样例输出</h3>
                     <pre>8</pre>
+                    
+                    <h3>提示</h3>
+                    <p>这是一个最基础的入门题目，用于熟悉平台的输入输出方式。</p>
                 `,
                 template: `#include <iostream>
 using namespace std;
@@ -332,6 +433,9 @@ int main() {
                     
                     <h3>样例输出</h3>
                     <pre>5</pre>
+                    
+                    <h3>提示</h3>
+                    <p>可以使用递归或循环实现，注意当n较大时递归可能导致性能问题。</p>
                 `,
                 template: `#include <iostream>
 using namespace std;
@@ -365,6 +469,9 @@ int main() {
                     
                     <h3>样例输出</h3>
                     <pre>6</pre>
+                    
+                    <h3>提示</h3>
+                    <p>可以使用欧几里得算法（辗转相除法）高效计算。</p>
                 `,
                 template: `#include <iostream>
 using namespace std;
@@ -403,6 +510,9 @@ int main() {
                     
                     <h3>样例输出2</h3>
                     <pre>0</pre>
+                    
+                    <h3>提示</h3>
+                    <p>素数的定义是只能被1和它本身整除的数。优化时可以只检查到√n。</p>
                 `,
                 template: `#include <iostream>
 using namespace std;
@@ -427,73 +537,55 @@ int main() {
         // 加载题目
         function loadProblem(id) {
             const problem = problems[id];
+            if (!problem) return;
             
-            // 更新浏览器地址栏
-            window.history.pushState({}, "", `problem/${id}`);
+            // 更新URL
+            const newUrl = `${window.location.origin}${window.location.pathname}problem/${id}`;
+            window.history.pushState({ problemId: id }, "", newUrl);
             
             // 显示题目详情
-            document.getElementById("current-problem-title").innerHTML = problem.title;
+            document.getElementById("problem-container").style.display = "block";
+            document.getElementById("current-problem-title").textContent = problem.title;
             document.getElementById("current-problem-content").innerHTML = problem.description;
-            document.getElementById("problem-detail").style.display = "block";
             
-            // 设置代码模板
-            editor.setValue(problem.template.trim());
+            // 清空代码编辑器和输入输出
+            editor.setValue("", -1);
             document.getElementById("stdin").value = "";
-            document.getElementById("result").innerHTML = "";
+            document.getElementById("result").innerHTML = "请先编写代码并点击运行";
             
             showHome();
         }
 
         // 显示主页
         function showHome() {
-            window.history.pushState({}, "", "/");
+            const newUrl = `${window.location.origin}${window.location.pathname}`;
+            window.history.pushState({}, "", newUrl);
             document.getElementById("home-page").style.display = "block";
             document.getElementById("problem-list").style.display = "none";
-            document.getElementById("problem-detail").style.display = "none";
         }
 
         // 显示题库
         function showProblems() {
-            window.history.pushState({}, "", "problem");
+            const newUrl = `${window.location.origin}${window.location.pathname}problem`;
+            window.history.pushState({}, "", newUrl);
             document.getElementById("home-page").style.display = "none";
             document.getElementById("problem-list").style.display = "block";
-            document.getElementById("problem-detail").style.display = "none";
+            document.getElementById("problem-container").style.display = "none";
         }
 
         // 处理浏览器前进/后退
         window.onpopstate = function(event) {
             const path = window.location.pathname;
-            if (path === "/" || path === "/wangzhechun.github.io/") {
-                showHome();
-            } else if (path.includes("problem/")) {
-                const problemId = path.split("/").pop();
-                if (problems[problemId]) {
-                    loadProblem(problemId);
-                } else {
-                    showProblems();
-                }
-            } else if (path.includes("problem")) {
-                showProblems();
-            }
-        };
-
-        // 初始化路由
-        function initRouter() {
-            const path = window.location.pathname;
-            if (path.includes("problem/")) {
-                const problemId = path.split("/").pop();
-                if (problems[problemId]) {
-                    loadProblem(problemId);
-                    return;
-                }
-            }
+            const problemMatch = path.match(/problem\/(A\d{4})$/);
             
-            if (path.includes("problem")) {
+            if (problemMatch) {
+                loadProblem(problemMatch[1]);
+            } else if (path.endsWith("problem")) {
                 showProblems();
             } else {
                 showHome();
             }
-        }
+        };
 
         // 运行代码（使用 Piston API）
         async function runCode() {
@@ -501,6 +593,11 @@ int main() {
             const language = document.getElementById("language").value;
             const stdin = document.getElementById("stdin").value;
             const resultDiv = document.getElementById("result");
+
+            if (!code.trim()) {
+                resultDiv.innerHTML = "<span style='color:red'>错误：代码不能为空</span>";
+                return;
+            }
 
             resultDiv.innerHTML = "<p>评测中...（首次请求可能需要10秒）</p>";
 
@@ -523,34 +620,55 @@ int main() {
                     output += `<pre>${data.run.stdout}</pre>`;
                 }
                 if (data.run.stderr) {
-                    output += `<pre class="error">${data.run.stderr}</pre>`;
+                    output += `<pre style="color:red">${data.run.stderr}</pre>`;
                 }
                 if (!data.run.stdout && !data.run.stderr) {
                     output = "<p>（无输出）</p>";
                 }
 
                 resultDiv.innerHTML = `
-                    <h3>评测结果</h3>
+                    <div style="margin-bottom: 15px;">
+                        <strong>评测结果：</strong>
+                        <span style="color: ${data.run.signal ? 'red' : 'green'}">
+                            ${data.run.signal ? '运行错误' : '运行成功'}
+                        </span>
+                    </div>
                     ${output}
-                    <div style="margin-top: 15px; color: #666;">
+                    <div style="margin-top: 15px; color: #666; font-size: 14px;">
                         <span>⏱️ 运行时间: ${data.run.time || 0}s</span>
                         <span style="margin-left: 15px;">📦 内存使用: ${data.run.memory || 'N/A'}B</span>
                     </div>
                 `;
             } catch (error) {
                 resultDiv.innerHTML = `
-                    <p class="error">评测失败：${error.message}</p>
-                    <p>请检查：</p>
-                    <ul>
-                        <li>网络连接是否正常</li>
-                        <li>代码是否有语法错误</li>
-                        <li>API服务是否可用</li>
+                    <div style="color:red; margin-bottom: 10px;">
+                        <strong>评测失败：</strong>${error.message}
+                    </div>
+                    <p>可能的原因：</p>
+                    <ul style="color: #666;">
+                        <li>网络连接问题</li>
+                        <li>API服务暂时不可用</li>
+                        <li>代码执行时间过长</li>
                     </ul>
                 `;
             }
         }
 
-        // 初始化
+        // 初始化路由
+        function initRouter() {
+            const path = window.location.pathname;
+            const problemMatch = path.match(/problem\/(A\d{4})$/);
+            
+            if (problemMatch) {
+                loadProblem(problemMatch[1]);
+            } else if (path.endsWith("problem")) {
+                showProblems();
+            } else {
+                showHome();
+            }
+        }
+
+        // 页面加载时初始化
         initRouter();
     </script>
 </body>
