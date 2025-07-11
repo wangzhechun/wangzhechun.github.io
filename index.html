@@ -281,8 +281,11 @@
     <!-- 侧边栏 -->
     <div id="sidebar">
         <h2>Woj导航</h2>
-        <button onclick="showHome()">🏠 回到主页</button>
-        <button onclick="showProblems()">📚 进入题库</button>
+        <button onclick="showHome()">🏠 主页</button>
+        <button onclick="showProblems()">📚 题库</button>
+        <div style="margin-top: 30px;">
+            <button onclick="location.href='newproblem'" style="background-color: #d4b78f;">✚ 创建题目</button>
+        </div>
     </div>
 
     <!-- 主内容区 -->
@@ -540,7 +543,7 @@ int main() {
             if (!problem) return;
             
             // 更新URL
-            const newUrl = `${window.location.origin}${window.location.pathname}problem/${id}`;
+            const newUrl = new URL(window.location.origin + '/problem/' + id);
             window.history.pushState({ problemId: id }, "", newUrl);
             
             // 显示题目详情
@@ -566,7 +569,7 @@ int main() {
 
         // 显示题库
         function showProblems() {
-            const newUrl = `${window.location.origin}${window.location.pathname}problem`;
+            const newUrl = new URL(window.location.origin + '/problem');
             window.history.pushState({}, "", newUrl);
             document.getElementById("home-page").style.display = "none";
             document.getElementById("problem-list").style.display = "block";
