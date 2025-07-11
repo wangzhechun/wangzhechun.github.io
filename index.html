@@ -1,24 +1,80 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>WOJ</title>
+    <title>我的在线代码评测站</title>
+    <!-- 引入 Ace 代码编辑器库 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.12/ace.js"></script>
     <style>
-        body { font-family: Arial; text-align: center; margin-top: 50px; }
-        textarea { width: 80%; height: 200px; margin: 20px; }
-        button { background: #0078d4; color: white; border: none; padding: 10px 20px; cursor: pointer; }
+        body { font-family: Arial; max-width: 800px; margin: 0 auto; padding: 20px; }
+        #editor { 
+            width: 100%;
+            height: 300px;
+            border: 1px solid #ddd;
+            font-size: 16px;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin-top: 10px;
+            cursor: pointer;
+        }
+        #result {
+            margin-top: 20px;
+            padding: 10px;
+            background: #f5f5f5;
+            border-left: 4px solid #4CAF50;
+        }
     </style>
 </head>
 <body>
-    <h1>简易代码评测系统</h1>
-    <p>粘贴你的 C++ 或 Python 代码，点击提交测试</p>
-    
+    <h1>✨ 我的代码评测系统 ✨</h1>
+    <p>支持 C++ 和 Python！</p>
+
+    <!-- 语言选择 -->
     <select id="language">
-        <option value="54">C++</option>
-        <option value="71">Python</option>
+        <option value="cpp">C++</option>
+        <option value="python">Python</option>
     </select>
-    <textarea id="code" placeholder="#include <iostream>\nint main() { std::cout << \"Hello!\"; }"></textarea>
-    <button onclick="alert('评测功能需配置Judge0 API，后续我会教你！');">提交评测</button>
+
+    <!-- 代码编辑器区域 -->
+    <div id="editor">#include <iostream>
+using namespace std;
+
+int main() {
+    cout << "Hello World!";
+    return 0;
+}</div>
+
+    <button onclick="runCode()">运行代码</button>
     
-    <p id="result"></p>
+    <!-- 结果显示 -->
+    <h3>运行结果：</h3>
+    <div id="result"></div>
+
+    <script>
+        // 初始化代码编辑器
+        const editor = ace.edit("editor");
+        editor.setTheme("ace/theme/chrome");
+        editor.session.setMode("ace/mode/c_cpp"); // 默认 C++ 语法高亮
+
+        // 切换语言时改变语法高亮
+        document.getElementById("language").addEventListener("change", function() {
+            const lang = this.value;
+            editor.session.setMode(`ace/mode/${lang === "cpp" ? "c_cpp" : "python"}`);
+        });
+
+        // 运行代码（模拟功能，实际需对接 Judge0 API）
+        function runCode() {
+            const code = editor.getValue();
+            const language = document.getElementById("language").value;
+            document.getElementById("result").innerHTML = `
+                <p>正在评测 ${language} 代码...</p>
+                <p>（实际功能需配置 Judge0 API，我会教你！）</p>
+                <pre>${code}</pre>
+            `;
+        }
+    </script>
 </body>
 </html>
