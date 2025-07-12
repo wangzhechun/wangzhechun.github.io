@@ -76,7 +76,7 @@
         
         <div id="login-form">
             <div class="form-group">
-                <input type="text" id="login-username" placeholder="用户名">
+                <input type="text" id="login-username" placeholder="用户名或邮箱">
             </div>
             <div class="form-group">
                 <input type="password" id="login-password" placeholder="密码">
@@ -87,6 +87,9 @@
         <div id="register-form" style="display: none;">
             <div class="form-group">
                 <input type="text" id="register-username" placeholder="用户名">
+            </div>
+            <div class="form-group">
+                <input type="email" id="register-email" placeholder="邮箱">
             </div>
             <div class="form-group">
                 <input type="password" id="register-password" placeholder="密码（至少6位）">
@@ -114,31 +117,35 @@
         }
         
         function login() {
-            const username = document.getElementById('login-username').value.trim();
+            const identifier = document.getElementById('login-username').value.trim();
             const password = document.getElementById('login-password').value.trim();
             
-            if (!username || !password) {
-                alert('请输入用户名和密码');
+            if (!identifier || !password) {
+                alert('请输入用户名/邮箱和密码');
                 return;
             }
             
             const users = JSON.parse(localStorage.getItem('woj_users')) || [];
-            const user = users.find(u => u.username === username && u.password === password);
+            const user = users.find(u => 
+                (u.username === identifier || u.email === identifier) && 
+                u.password === password
+            );
             
             if (user) {
                 localStorage.setItem('woj_currentUser', JSON.stringify(user));
                 location.href = 'index.html';
             } else {
-                alert('用户名或密码错误');
+                alert('用户名/邮箱或密码错误');
             }
         }
         
         function register() {
             const username = document.getElementById('register-username').value.trim();
+            const email = document.getElementById('register-email').value.trim();
             const password = document.getElementById('register-password').value.trim();
             const confirm = document.getElementById('register-confirm').value.trim();
             
-            if (!username || !password || !confirm) {
+            if (!username || !email || !password || !confirm) {
                 alert('请填写所有字段');
                 return;
             }
@@ -153,10 +160,20 @@
                 return;
             }
             
+            if (!email.includes('@')) {
+                alert('请输入有效的邮箱地址');
+                return;
+            }
+            
             let users = JSON.parse(localStorage.getItem('woj_users')) || [];
             
             if (users.some(u => u.username === username)) {
                 alert('用户名已存在');
+                return;
+            }
+            
+            if (users.some(u => u.email === email)) {
+                alert('邮箱已被注册');
                 return;
             }
             
@@ -165,6 +182,7 @@
             const newUser = {
                 userId: nextUserId,
                 username,
+                email,
                 password,
                 isAdmin: nextUserId === 0,
                 createdAt: new Date().toISOString()
