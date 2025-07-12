@@ -91,11 +91,6 @@
                 <textarea id="description" required></textarea>
             </div>
             
-            <div>
-                <label>代码模板</label>
-                <textarea id="template" required></textarea>
-            </div>
-            
             <div class="button-group">
                 <button class="btn-primary" onclick="saveProblem()">保存题目</button>
                 <button onclick="location.href='index.html'">取消</button>
@@ -125,16 +120,14 @@
                 document.getElementById('form-title').textContent = `编辑题目 ${editId}`;
                 document.getElementById('title').value = problem.title;
                 document.getElementById('description').value = problem.description;
-                document.getElementById('template').value = problem.template;
             }
         }
         
         function saveProblem() {
             const title = document.getElementById('title').value.trim();
             const description = document.getElementById('description').value.trim();
-            const template = document.getElementById('template').value.trim();
             
-            if (!title || !description || !template) {
+            if (!title || !description) {
                 alert('请填写所有字段');
                 return;
             }
@@ -160,7 +153,6 @@
             problems[problemId] = {
                 title,
                 description,
-                template,
                 creatorId: user.userId,
                 createdAt: new Date().toISOString()
             };
