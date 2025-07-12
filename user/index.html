@@ -65,6 +65,23 @@
             padding: 40px;
             color: #999;
         }
+        .action-buttons {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+        .action-btn {
+            padding: 10px 20px;
+            border-radius: 20px;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .user-list-btn {
+            background: #3498db;
+            color: white;
+        }
     </style>
 </head>
 <body>
@@ -73,14 +90,17 @@
         <h1 id="username">用户名</h1>
         <div class="user-meta">
             <span id="user-id">ID: </span> | 
+            <span id="user-email">邮箱: </span> | 
             <span id="user-role">权限: </span>
+        </div>
+        <div class="action-buttons" id="action-buttons">
+            <!-- 按钮将通过JS动态生成 -->
         </div>
     </div>
 
     <div class="problems-container">
         <h2>创建的题目</h2>
         <div id="problems-list">
-            <!-- 题目列表将通过JS动态生成 -->
             <div class="empty-state">加载中...</div>
         </div>
     </div>
@@ -89,6 +109,7 @@
         // 从URL获取用户ID
         const urlParams = new URLSearchParams(window.location.search);
         const userId = parseInt(urlParams.get('userId'));
+        const currentUser = JSON.parse(localStorage.getItem('woj_currentUser'));
         
         // 加载数据
         const users = JSON.parse(localStorage.getItem('woj_users')) || [];
@@ -100,7 +121,20 @@
             document.getElementById('user-avatar').textContent = user.username.charAt(0).toUpperCase();
             document.getElementById('username').textContent = user.username;
             document.getElementById('user-id').textContent = `ID: ${user.userId}`;
+            document.getElementById('user-email').textContent = `邮箱: ${user.email || '未设置'}`;
             document.getElementById('user-role').textContent = `权限: ${user.userId === 0 ? '站长' : '普通用户'}`;
+            
+            // 显示操作按钮
+            const actionButtons = document.getElementById('action-buttons');
+            
+            // 如果是站长，显示用户列表按钮
+            if (currentUser && currentUser.userId === 0) {
+                const userListBtn = document.createElement('button');
+                userListBtn.className = 'action-btn user-list-btn';
+                userListBtn.textContent = '查看所有用户';
+                userListBtn.onclick = showUserList;
+                actionButtons.appendChild(userListBtn);
+            }
             
             // 显示用户创建的题目
             const userProblems = Object.entries(problems)
@@ -133,6 +167,48 @@
                 <a href="../index.html" style="color: var(--primary-color);">返回首页</a>
             `;
             document.getElementById('problems-list').innerHTML = '';
+        }
+        
+        function deleteUser(userId) {
+            if (!confirm(`确定要删除用户ID为${userId}的账号吗？这将删除该用户的所有题目和数据！`)) return;
+            
+            // 删除用户创建的题目
+            const problems = JSON.parse(localStorage.getItem('woj_problems')) || {};
+            Object.keys(problems).forEach(id => {
+                if (problems[id].creatorId === userId) {
+                    delete problems[id];
+                }
+            });
+            localStorage.setItem('woj_problems', JSON.stringify(problems));
+            
+            // 从用户列表中删除
+            let users = JSON.parse(localStorage.getItem('woj_users')) || [];
+            users = users.filter(u => u.userId !== userId);
+            localStorage.setItem('woj_users', JSON.stringify(users));
+            
+            alert('用户已删除');
+            location.href = '../index.html';
+        }
+        
+        function showUserList() {
+            const users = JSON.parse(localStorage.getItem('woj_users')) || [];
+            const container = document.getElementById('problems-list');
+            
+            container.innerHTML = `
+                <h3>用户列表</h3>
+                <div style="margin-bottom: 20px;">
+                    ${users.map(user => `
+                        <div style="padding: 10px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between;">
+                            <div>
+                                <strong>${user.username}</strong> (ID: ${user.userId})
+                                <div style="font-size: 12px; color: #666;">${user.email || '无邮箱'} | 注册于: ${new Date(user.createdAt).toLocaleDateString()}</div>
+                            </div>
+                            ${user.userId !== 0 ? `<button onclick="deleteUser(${user.userId})" style="background: #e74c3c; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">删除</button>` : ''}
+                        </div>
+                    `).join('')}
+                </div>
+                <button onclick="location.reload()" style="background: #8b6b4a; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer;">返回</button>
+            `;
         }
     </script>
 </body>
