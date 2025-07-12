@@ -132,7 +132,9 @@
                 const userListBtn = document.createElement('button');
                 userListBtn.className = 'action-btn user-list-btn';
                 userListBtn.textContent = '查看所有用户';
-                userListBtn.onclick = showUserList;
+                userListBtn.onclick = () => {
+                    window.location.href = 'https://wangzhechun.github.io/users';
+                };
                 actionButtons.appendChild(userListBtn);
             }
             
@@ -167,48 +169,6 @@
                 <a href="../index.html" style="color: var(--primary-color);">返回首页</a>
             `;
             document.getElementById('problems-list').innerHTML = '';
-        }
-        
-        function deleteUser(userId) {
-            if (!confirm(`确定要删除用户ID为${userId}的账号吗？这将删除该用户的所有题目和数据！`)) return;
-            
-            // 删除用户创建的题目
-            const problems = JSON.parse(localStorage.getItem('woj_problems')) || {};
-            Object.keys(problems).forEach(id => {
-                if (problems[id].creatorId === userId) {
-                    delete problems[id];
-                }
-            });
-            localStorage.setItem('woj_problems', JSON.stringify(problems));
-            
-            // 从用户列表中删除
-            let users = JSON.parse(localStorage.getItem('woj_users')) || [];
-            users = users.filter(u => u.userId !== userId);
-            localStorage.setItem('woj_users', JSON.stringify(users));
-            
-            alert('用户已删除');
-            location.href = '../index.html';
-        }
-        
-        function showUserList() {
-            const users = JSON.parse(localStorage.getItem('woj_users')) || [];
-            const container = document.getElementById('problems-list');
-            
-            container.innerHTML = `
-                <h3>用户列表</h3>
-                <div style="margin-bottom: 20px;">
-                    ${users.map(user => `
-                        <div style="padding: 10px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between;">
-                            <div>
-                                <strong>${user.username}</strong> (ID: ${user.userId})
-                                <div style="font-size: 12px; color: #666;">${user.email || '无邮箱'} | 注册于: ${new Date(user.createdAt).toLocaleDateString()}</div>
-                            </div>
-                            ${user.userId !== 0 ? `<button onclick="deleteUser(${user.userId})" style="background: #e74c3c; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">删除</button>` : ''}
-                        </div>
-                    `).join('')}
-                </div>
-                <button onclick="location.reload()" style="background: #8b6b4a; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer;">返回</button>
-            `;
         }
     </script>
 </body>
