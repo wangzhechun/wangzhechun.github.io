@@ -11,7 +11,6 @@
             --white: #ffffff;
         }
         
-        /* 基础样式 */
         body {
             font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
             margin: 0;
@@ -22,7 +21,6 @@
             line-height: 1.6;
         }
         
-        /* 窄侧边栏 */
         #sidebar {
             width: 180px;
             background-color: var(--light-bg);
@@ -41,7 +39,6 @@
             font-size: 1.1em;
         }
         
-        /* 带圆角的导航按钮 */
         .nav-card {
             background: var(--white);
             border-radius: 10px;
@@ -59,7 +56,6 @@
             border-color: var(--secondary-color);
         }
         
-        /* 主内容区 */
         #main-content {
             flex: 1;
             padding: 25px;
@@ -67,7 +63,6 @@
             max-width: 900px;
         }
         
-        /* 卡片样式 */
         .card {
             background-color: var(--white);
             padding: 20px;
@@ -77,10 +72,9 @@
             border: 1px solid #eee;
         }
         
-        /* 用户菜单 */
         .user-menu {
             position: fixed;
-            top: 20px;
+            top: 30px;
             right: 20px;
             z-index: 1000;
             display: flex;
@@ -105,6 +99,7 @@
         .logout-btn {
             background: #e74c3c;
             color: white;
+            margin-left: auto;
         }
         
         .user-btn {
@@ -131,7 +126,6 @@
             font-size: 12px;
         }
         
-        /* 编辑器样式 */
         #editor-container {
             border-radius: 10px;
             overflow: hidden;
@@ -143,7 +137,6 @@
             font-size: 14px;
         }
         
-        /* 响应式设计 */
         @media (max-width: 768px) {
             #sidebar {
                 width: 100%;
@@ -163,7 +156,6 @@
     </style>
 </head>
 <body>
-    <!-- 用户菜单 -->
     <div class="user-menu" id="user-menu">
         <div id="auth-buttons">
             <button class="auth-btn login-btn" onclick="location.href='auth.html'">登录 / 注册</button>
@@ -177,7 +169,6 @@
         </div>
     </div>
 
-    <!-- 窄侧边栏 -->
     <div id="sidebar">
         <h2>Woj导航</h2>
         <div class="nav-card" onclick="location.hash=''">🏠 主页</div>
@@ -190,27 +181,22 @@
         </div>
     </div>
 
-    <!-- 主内容区 -->
     <div id="main-content">
-        <!-- 主页内容 -->
         <div id="home-page">
             <div class="card">
                 <h1 style="color: var(--primary-color); margin-top: 0;">Woj | 信息竞赛平台</h1>
                 <p style="color: #a89b8a;">练习编程，提升算法能力</p>
             </div>
             
-            <!-- 题目详情 -->
             <div id="problem-container" class="card" style="display: none;">
                 <h2 id="current-problem-title" style="color: var(--primary-color); margin-top: 0;"></h2>
                 <div id="current-problem-content"></div>
             </div>
 
-            <!-- 代码编辑器 -->
             <div id="editor-container" class="card">
                 <div id="editor"></div>
             </div>
 
-            <!-- 运行控制区 -->
             <div id="run-controls" class="card">
                 <div style="display: flex; align-items: center; margin-bottom: 15px;">
                     <label for="language" style="margin-right: 10px;">语言：</label>
@@ -228,7 +214,6 @@
                 <button id="run-button" class="auth-btn login-btn" style="width: auto;">▶️ 运行代码</button>
             </div>
 
-            <!-- 输入输出区 -->
             <div id="io-container">
                 <div class="card">
                     <h3 style="color: var(--primary-color); margin-top: 0;">输入（stdin）</h3>
@@ -242,7 +227,6 @@
             </div>
         </div>
 
-        <!-- 题库内容 -->
         <div id="problem-list" style="display: none;">
             <div class="card">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
@@ -250,7 +234,6 @@
                     <a href="newproblem.html" class="auth-btn login-btn" id="new-problem-list-btn" style="display: none; text-decoration: none;">✚ 新建题目</a>
                 </div>
                 
-                <!-- 搜索框 -->
                 <div style="position: relative; margin-bottom: 20px; max-width: 400px;">
                     <span style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #a89b8a;">🔍</span>
                     <input type="text" id="search-input" placeholder="搜索题目ID或名称..." oninput="filterProblems()" 
@@ -263,14 +246,12 @@
     </div>
 
     <script>
-        // === 配置 === //
         const GITHUB_OWNER = "wangzhechun";
         const GITHUB_REPO = "Woj-data";
         const DATA_PATH = "data/problems.json";
         let githubToken = localStorage.getItem('github_token') || "";
         let problems = JSON.parse(localStorage.getItem('woj_problems')) || {};
 
-        // === 初始化编辑器 === //
         const editor = ace.edit("editor");
         editor.setTheme("ace/theme/chrome");
         editor.session.setMode("ace/mode/c_cpp");
@@ -281,7 +262,6 @@
             highlightActiveLine: true
         });
 
-        // === 用户系统 === //
         function checkAuth() {
             const user = JSON.parse(localStorage.getItem('woj_currentUser'));
             const authButtons = document.getElementById('auth-buttons');
@@ -296,7 +276,6 @@
                 document.getElementById('username-display').textContent = user.username;
                 document.getElementById('user-profile-btn').href = `user/index.html?userId=${user.userId}`;
                 
-                // 显示新建题目按钮
                 newProblemBtn.style.display = 'block';
                 newProblemListBtn.style.display = 'block';
             } else {
@@ -313,7 +292,6 @@
             location.href = 'index.html';
         }
 
-        // === 题目管理 === //
         function renderProblemList(filter = "") {
             const container = document.getElementById('problems-container');
             container.innerHTML = '';
@@ -416,7 +394,6 @@
             }
         }
 
-        // === 代码运行 === //
         async function runCode() {
             const code = editor.getValue();
             const language = document.getElementById("language").value;
@@ -458,7 +435,6 @@
             }
         }
 
-        // === GitHub同步 === //
         async function loadFromGitHub() {
             if (!githubToken) {
                 githubToken = prompt("请输入GitHub Personal Access Token（需要repo权限）:");
@@ -492,7 +468,6 @@
 
         async function saveToGitHub() {
             try {
-                // 获取文件SHA（用于更新现有文件）
                 const getResponse = await fetch(
                     `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${DATA_PATH}`,
                     { headers: { 'Authorization': `token ${githubToken}` } }
@@ -500,7 +475,6 @@
                 let sha = null;
                 if (getResponse.ok) sha = (await getResponse.json()).sha;
 
-                // 上传数据
                 const putResponse = await fetch(
                     `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${DATA_PATH}`,
                     {
@@ -533,7 +507,10 @@
             }
         }
 
-        // === 路由控制 === //
+        function showUserList() {
+            window.location.href = 'https://wangzhechun.github.io/users';
+        }
+
         function handleRoute() {
             const hash = location.hash;
             
@@ -552,15 +529,10 @@
             }
         }
 
-        // === 初始化 === //
         window.addEventListener('load', function() {
             checkAuth();
             handleRoute();
-            
-            // 设置运行按钮事件
             document.getElementById('run-button').onclick = runCode;
-            
-            // 自动尝试同步数据
             if (githubToken) {
                 loadFromGitHub().then(success => {
                     if (success && location.hash === "#problem") {
