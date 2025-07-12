@@ -35,11 +35,12 @@
             background-color: #e8d5b5;
             color: #5a4a3a;
             border: none;
-            border-radius: 6px;
+            border-radius: 8px;
             cursor: pointer;
             font-size: 15px;
             text-align: left;
             transition: all 0.3s;
+            outline: none;
         }
         
         .sidebar button:hover {
@@ -77,7 +78,7 @@
             color: #5a4a3a;
         }
         
-        input, textarea {
+        input, textarea, select {
             width: 100%;
             padding: 12px;
             border: 1px solid #e0d6c2;
@@ -150,11 +151,16 @@
 
     <div class="main-content">
         <div class="form-container">
-            <h1>创建新题目</h1>
+            <h1 id="form-title">创建新题目</h1>
             
             <div class="form-group">
                 <label for="title">题目名称</label>
                 <input type="text" id="title" required placeholder="例如: A+B Problem">
+            </div>
+            
+            <div id="custom-id-container" class="form-group" style="display: none;">
+                <label for="custom-id">自定义题号 (仅管理员)</label>
+                <input type="text" id="custom-id" placeholder="例如: A001">
             </div>
             
             <div class="form-group">
@@ -175,37 +181,87 @@
     </div>
 
     <script>
-        function saveProblem() {
-            const title = document.getElementById('title').value.trim();
-            const description = document.getElementById('description').value.trim();
-            const template = document.getElementById('template').value.trim();
+        // 检查URL参数，判断是新建还是编辑
+        const params = new URLSearchParams(window.location.search);
+        const editId = params.get('edit');
+        const user = JSON.parse(localStorage.getItem('woj_currentUser'));
+        
+        if (!user) {
+            alert('请先登录');
+            location.href = 'auth.html';
+        }
+        
+        // 如果是管理员，显示自定义题号输入框
+        if (user && user.userId === 0) {
+            document.getElementById('custom-id-container').style.display = 'block';
+        }
+        
+        // 如果是编辑模式，加载题目数据
+        if (editId) {
+            const problems = JSON.parse(localStorage.getItem('woj_problems')) || {};
+            const problem = problems[editId];
             
-            if (!title || !description || !template) {
-                alert('请填写所有字段');
+            if (problem) {
+                document.title = `编辑题目 - ${editId} | Woj`;
+                document.getElementById('form-title').textContent = `编辑题目 ${editId}`;
+                document.getElementById('title').value = problem.title;
+                document.getElementById('description').value = problem.description;
+                document.getElementById('template').value = problem.template;
+            }
+        }
+        
+        function saveProblem() {
+            const user = JSON.parse(localStorage.getItem('woj_currentUser'));
+            if (!user) {
+                alert('请先登录');
+                location.href = 'auth.html';
                 return;
             }
             
-            // 从本地存储获取现有题目或初始化
+            const title = document.getElementById('title').value.trim();
+            const description = document.getElementById('description').value.trim();
+            const template = document.getElementById('template').value.trim();
+            const customId = document.getElementById('custom-id')?.value.trim();
+            
+            if (!title || !description || !template) {
+                alert('请填写所有必填字段');
+                return;
+            }
+            
             let problems = JSON.parse(localStorage.getItem('woj_problems')) || {};
+            let problemId;
             
-            // 生成题号 (A+4位数字)
-            const ids = Object.keys(problems);
-            const nextNum = ids.length > 0 ? 
-                Math.max(...ids.map(id => parseInt(id.substring(1)))) + 1 : 1;
-            const newId = 'A' + nextNum.toString().padStart(4, '0');
+            if (editId) {
+                // 编辑现有题目
+                problemId = editId;
+            } else if (user.userId === 0 && customId) {
+                // 管理员自定义题号
+                if (problems[customId]) {
+                    alert('该题号已存在');
+                    return;
+                }
+                problemId = customId;
+            } else {
+                // 普通用户自动分配U+四位数的题号
+                const userProblems = Object.entries(problems)
+                    .filter(([id, p]) => id.startsWith('U') && p.creatorId === user.userId);
+                
+                const nextNum = userProblems.length > 0 ? 
+                    Math.max(...userProblems.map(([id]) => parseInt(id.substring(1)))) + 1 : 1;
+                problemId = 'U' + nextNum.toString().padStart(4, '0');
+            }
             
-            // 添加新题目
-            problems[newId] = {
-                title: `${newId} | ${title}`,
+            // 添加/更新题目
+            problems[problemId] = {
+                title: title,
                 description: description,
-                template: template
+                template: template,
+                creatorId: user.userId
             };
             
-            // 保存到本地存储
             localStorage.setItem('woj_problems', JSON.stringify(problems));
-            
-            alert(`题目 ${newId} 创建成功！`);
-            location.href = `index.html#problem/${newId}`;
+            alert(`题目 ${problemId} ${editId ? '更新' : '创建'}成功！`);
+            location.href = `index.html#problem/${problemId}`;
         }
     </script>
 </body>
