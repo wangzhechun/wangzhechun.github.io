@@ -75,6 +75,8 @@
             box-shadow: 0 2px 15px rgba(0,0,0,0.08);
             margin-bottom: 25px;
             border: 1px solid #eee;
+            width: 100%;
+            box-sizing: border-box;
         }
         
         .user-menu {
@@ -134,17 +136,18 @@
         }
         
         #editor-container {
-            border-radius: 8px;
+            border-radius: 0;
             overflow: hidden;
-            box-shadow: 0 2px 15px rgba(0,0,0,0.1);
-            border: 1px solid #e0d6c2;
+            box-shadow: none;
+            border: none;
             width: 100%;
-            margin: 0 auto;
+            margin: 0;
         }
         
         #editor {
             height: 400px;
             font-size: 15px;
+            width: 100%;
         }
         
         .io-container {
@@ -249,35 +252,6 @@
             font-size: 14px;
         }
         
-        /* 响应式设计 */
-        @media (max-width: 768px) {
-            body {
-                flex-direction: column;
-            }
-            
-            #sidebar {
-                width: 100%;
-                position: relative;
-                height: auto;
-                padding: 15px;
-            }
-            
-            #main-content {
-                margin-left: 0;
-                padding: 20px;
-            }
-            
-            .user-menu {
-                position: static;
-                margin: 15px 0;
-                justify-content: flex-end;
-            }
-            
-            #editor {
-                height: 300px;
-            }
-        }
-
         /* 题目列表样式 */
         .problem-list-item {
             display: flex;
@@ -330,10 +304,12 @@
         .search-container {
             position: relative;
             margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
         }
         
         #search-input {
-            width: 100%;
+            flex: 1;
             padding: 10px 15px 10px 40px;
             border: 1px solid #e0d6c2;
             border-radius: 20px;
@@ -346,6 +322,53 @@
             top: 50%;
             transform: translateY(-50%);
             color: var(--light-text);
+        }
+        
+        #search-btn {
+            padding: 10px 20px;
+            background: var(--secondary-color);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            body {
+                flex-direction: column;
+            }
+            
+            #sidebar {
+                width: 100%;
+                position: relative;
+                height: auto;
+                padding: 15px;
+            }
+            
+            #main-content {
+                margin-left: 0;
+                padding: 20px;
+            }
+            
+            .user-menu {
+                position: static;
+                margin: 15px 0;
+                justify-content: flex-end;
+            }
+            
+            #editor {
+                height: 300px;
+            }
+            
+            .search-container {
+                flex-direction: column;
+            }
+            
+            #search-btn {
+                width: 100%;
+            }
         }
     </style>
 </head>
@@ -387,8 +410,10 @@
                 <div id="current-problem-content" style="line-height: 1.7;"></div>
             </div>
 
-            <div id="editor-container" class="card">
-                <div id="editor"></div>
+            <div class="card" style="padding: 0; overflow: hidden;">
+                <div id="editor-container">
+                    <div id="editor"></div>
+                </div>
             </div>
 
             <div class="run-controls">
@@ -431,7 +456,8 @@
                 
                 <div class="search-container">
                     <span class="search-icon">🔍</span>
-                    <input type="text" id="search-input" placeholder="搜索题目ID或名称..." oninput="filterProblems()">
+                    <input type="text" id="search-input" placeholder="搜索题目ID或名称...">
+                    <button id="search-btn" onclick="filterProblems()">搜索</button>
                 </div>
                 
                 <div id="problems-container" style="max-height: 500px; overflow-y: auto;"></div>
@@ -545,7 +571,8 @@
         }
 
         function filterProblems() {
-            renderProblemList(document.getElementById('search-input').value);
+            const searchInput = document.getElementById('search-input');
+            renderProblemList(searchInput.value);
         }
 
         function loadProblem(id) {
@@ -596,10 +623,12 @@
             if (confirm(`确定要删除题目 ${id} 吗？此操作不可撤销！`)) {
                 delete problems[id];
                 localStorage.setItem('woj_problems', JSON.stringify(problems));
-                saveToGitHub().then(() => renderProblemList());
-                if (location.hash.includes(id)) {
-                    location.hash = '#problem';
-                }
+                saveToGitHub().then(() => {
+                    renderProblemList();
+                    if (location.hash.includes(id)) {
+                        location.hash = '#problem';
+                    }
+                });
             }
         }
 
@@ -860,6 +889,13 @@
             document.getElementById('language').addEventListener('change', function() {
                 const language = this.value;
                 editor.session.setMode(`ace/mode/${language === 'cpp' ? 'c_cpp' : language}`);
+            });
+            
+            // 搜索框回车事件
+            document.getElementById('search-input').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    filterProblems();
+                }
             });
             
             // 自动同步逻辑
