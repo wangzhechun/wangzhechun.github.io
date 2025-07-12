@@ -100,9 +100,6 @@
             background: #e74c3c;
             color: white;
             margin-left: 10px;
-            position: relative;
-            top: 5px;
-            margin-left: auto;
         }
         
         .user-btn {
@@ -133,7 +130,6 @@
             border-radius: 10px;
             overflow: hidden;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            width: 100%;
         }
         
         #editor {
@@ -169,7 +165,7 @@
                 <span class="user-avatar" id="user-avatar">U</span>
                 <span id="username-display"></span>
             </a>
-            <button class="auth-btn logout-btn" onclick="logout()">登出</button>
+            <button class="auth-btn logout-btn" onclick="logout()" style="margin-left: auto;">登出</button>
         </div>
     </div>
 
@@ -221,7 +217,7 @@
             <div id="io-container">
                 <div class="card">
                     <h3 style="color: var(--primary-color); margin-top: 0;">输入（stdin）</h3>
-                    <textarea id="stdin" rows="4" style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #e0d6c2;"></textarea>
+                    <textarea id="stdin" rows="4" style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #e0d6c2; resize: vertical; min-height: 100px;"></textarea>
                 </div>
                 
                 <div class="card">
@@ -281,7 +277,7 @@
             
             if (user) {
                 authButtons.style.display = 'none';
-                userProfile.style.display = 'block';
+                userProfile.style.display = 'flex';
                 document.getElementById('user-avatar').textContent = user.username.charAt(0).toUpperCase();
                 document.getElementById('username-display').textContent = user.username;
                 document.getElementById('user-profile-btn').href = `user/index.html?userId=${user.userId}`;
