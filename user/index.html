@@ -93,9 +93,7 @@
             <span id="user-email">邮箱: </span> | 
             <span id="user-role">权限: </span>
         </div>
-        <div class="action-buttons" id="action-buttons">
-            <!-- 按钮将通过JS动态生成 -->
-        </div>
+        <div class="action-buttons" id="action-buttons"></div>
     </div>
 
     <div class="problems-container">
@@ -124,18 +122,13 @@
             document.getElementById('user-email').textContent = `邮箱: ${user.email || '未设置'}`;
             document.getElementById('user-role').textContent = `权限: ${user.userId === 0 ? '站长' : '普通用户'}`;
             
-            // 显示操作按钮
-            const actionButtons = document.getElementById('action-buttons');
-            
-            // 如果是站长，显示用户列表按钮
+            // 站长显示用户列表按钮
             if (currentUser && currentUser.userId === 0) {
-                const userListBtn = document.createElement('button');
-                userListBtn.className = 'action-btn user-list-btn';
-                userListBtn.textContent = '查看所有用户';
-                userListBtn.onclick = () => {
-                    window.location.href = 'https://wangzhechun.github.io/users';
-                };
-                actionButtons.appendChild(userListBtn);
+                const btn = document.createElement('button');
+                btn.className = 'action-btn user-list-btn';
+                btn.textContent = '查看所有用户';
+                btn.onclick = () => window.open('https://wangzhechun.github.io/users', '_blank');
+                document.getElementById('action-buttons').appendChild(btn);
             }
             
             // 显示用户创建的题目
