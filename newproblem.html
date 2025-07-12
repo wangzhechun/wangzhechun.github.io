@@ -39,10 +39,12 @@
             border-radius: 8px;
             margin-bottom: 20px;
             font-size: 16px;
+            box-sizing: border-box;
         }
         
         textarea {
             min-height: 200px;
+            font-family: monospace;
         }
         
         .button-group {
@@ -159,7 +161,8 @@
                 title,
                 description,
                 template,
-                creatorId: user.userId
+                creatorId: user.userId,
+                createdAt: new Date().toISOString()
             };
             
             localStorage.setItem('woj_problems', JSON.stringify(problems));
