@@ -245,7 +245,7 @@
                 </div>
                 
                 <!-- 搜索框 -->
-                <div style="position: relative; margin-bottom: 20px;">
+                <div style="position: relative; margin-bottom: 20px; max-width: 400px;">
                     <span style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #a89b8a;">🔍</span>
                     <input type="text" id="search-input" placeholder="搜索题目ID或名称..." oninput="filterProblems()" 
                            style="width: 100%; padding: 10px 10px 10px 40px; border: 1px solid #e0d6c2; border-radius: 20px;">
@@ -299,12 +299,6 @@
                 newProblemBtn.style.display = 'none';
                 newProblemListBtn.style.display = 'none';
             }
-        }
-
-        function logout() {
-            localStorage.removeItem('woj_currentUser');
-            checkAuth();
-            location.href = 'auth.html';
         }
 
         // === 题目管理 === //
