@@ -102,6 +102,11 @@
             color: white;
         }
         
+        .logout-btn {
+            background: #e74c3c;
+            color: white;
+        }
+        
         .user-btn {
             display: flex;
             align-items: center;
@@ -168,6 +173,7 @@
                 <span class="user-avatar" id="user-avatar">U</span>
                 <span id="username-display"></span>
             </a>
+            <button class="auth-btn logout-btn" onclick="logout()">登出</button>
         </div>
     </div>
 
@@ -299,6 +305,12 @@
                 newProblemBtn.style.display = 'none';
                 newProblemListBtn.style.display = 'none';
             }
+        }
+
+        function logout() {
+            localStorage.removeItem('woj_currentUser');
+            checkAuth();
+            location.href = 'index.html';
         }
 
         // === 题目管理 === //
