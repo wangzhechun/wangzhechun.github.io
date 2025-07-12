@@ -99,7 +99,7 @@
         .logout-btn {
             background: #e74c3c;
             color: white;
-            margin-left: auto;
+            margin-left: 10px;
         }
         
         .user-btn {
@@ -176,7 +176,7 @@
         <div class="nav-card" onclick="location.href='newproblem.html'" id="new-problem-btn" style="display: none; background-color: var(--secondary-color); color: white;">
             ✚ 新建题目
         </div>
-        <div class="nav-card" onclick="syncWithGitHub()" style="background: #6e5494; color: white;">
+        <div class="nav-card" onclick="syncWithGitHub(true)" style="background: #6e5494; color: white;">
             🔄 同步数据
         </div>
     </div>
@@ -246,12 +246,16 @@
     </div>
 
     <script>
+        // === 配置 === //
         const GITHUB_OWNER = "wangzhechun";
         const GITHUB_REPO = "Woj-data";
         const DATA_PATH = "data/problems.json";
+        const AUTO_SYNC_INTERVAL = 300000; // 5分钟同步一次
         let githubToken = localStorage.getItem('github_token') || "";
         let problems = JSON.parse(localStorage.getItem('woj_problems')) || {};
+        let syncTimer = null;
 
+        // === 初始化编辑器 === //
         const editor = ace.edit("editor");
         editor.setTheme("ace/theme/chrome");
         editor.session.setMode("ace/mode/c_cpp");
@@ -262,6 +266,7 @@
             highlightActiveLine: true
         });
 
+        // === 用户系统 === //
         function checkAuth() {
             const user = JSON.parse(localStorage.getItem('woj_currentUser'));
             const authButtons = document.getElementById('auth-buttons');
@@ -292,6 +297,7 @@
             location.href = 'index.html';
         }
 
+        // === 题目管理 === //
         function renderProblemList(filter = "") {
             const container = document.getElementById('problems-container');
             container.innerHTML = '';
@@ -394,6 +400,7 @@
             }
         }
 
+        // === 代码运行 === //
         async function runCode() {
             const code = editor.getValue();
             const language = document.getElementById("language").value;
@@ -435,11 +442,16 @@
             }
         }
 
-        async function loadFromGitHub() {
+        // === GitHub同步 === //
+        async function loadFromGitHub(silent = false) {
             if (!githubToken) {
-                githubToken = prompt("请输入GitHub Personal Access Token（需要repo权限）:");
-                if (!githubToken) return false;
-                localStorage.setItem('github_token', githubToken);
+                if (!silent) {
+                    githubToken = prompt("请输入GitHub Personal Access Token（需要repo权限）:");
+                    if (!githubToken) return false;
+                    localStorage.setItem('github_token', githubToken);
+                } else {
+                    return false;
+                }
             }
             
             try {
@@ -458,9 +470,11 @@
                     const content = JSON.parse(atob(data.content.replace(/\s/g, '')));
                     localStorage.setItem('woj_problems', JSON.stringify(content));
                     problems = content;
+                    if (!silent) alert("同步成功！");
                     return true;
                 }
             } catch (error) {
+                if (!silent) alert("同步失败，请检查Token权限");
                 console.error("同步失败:", error);
             }
             return false;
@@ -498,19 +512,20 @@
             }
         }
 
-        async function syncWithGitHub() {
-            if (await loadFromGitHub()) {
-                alert("同步成功！");
+        async function syncWithGitHub(manual = false) {
+            if (await loadFromGitHub(!manual)) {
+                if (manual) alert("同步成功！");
                 if (location.hash === "#problem") renderProblemList();
-            } else {
+            } else if (manual) {
                 alert("同步失败，请检查Token权限");
             }
         }
 
         function showUserList() {
-            window.location.href = 'https://wangzhechun.github.io/users';
+            window.open('https://wangzhechun.github.io/users', '_blank');
         }
 
+        // === 路由控制 === //
         function handleRoute() {
             const hash = location.hash;
             
@@ -529,16 +544,36 @@
             }
         }
 
+        // === 初始化 === //
         window.addEventListener('load', function() {
             checkAuth();
             handleRoute();
             document.getElementById('run-button').onclick = runCode;
+            
+            // 自动同步逻辑
+            const initSync = async () => {
+                try {
+                    await loadFromGitHub(true);
+                    if (location.hash === "#problem") renderProblemList();
+                    
+                    syncTimer = setInterval(async () => {
+                        await loadFromGitHub(true);
+                        console.log('自动同步完成:', new Date());
+                    }, AUTO_SYNC_INTERVAL);
+                } catch (error) {
+                    console.error('自动同步失败:', error);
+                }
+            };
+
             if (githubToken) {
-                loadFromGitHub().then(success => {
-                    if (success && location.hash === "#problem") {
-                        renderProblemList();
-                    }
-                });
+                initSync();
+            } else if (confirm('是否要设置GitHub自动同步？')) {
+                const token = prompt('请输入GitHub Personal Access Token:');
+                if (token) {
+                    localStorage.setItem('github_token', token);
+                    githubToken = token;
+                    initSync();
+                }
             }
         });
         
