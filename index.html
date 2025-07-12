@@ -43,13 +43,14 @@
             background-color: #e8d5b5;
             color: #5a4a3a;
             border: none;
-            border-radius: 6px;
+            border-radius: 8px;
             cursor: pointer;
             font-size: 15px;
             text-align: left;
             transition: all 0.3s;
             font-weight: 500;
             box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            outline: none;
         }
 
         #sidebar button:hover {
@@ -191,10 +192,11 @@
             padding: 12px 25px;
             font-size: 15px;
             cursor: pointer;
-            border-radius: 6px;
+            border-radius: 8px;
             transition: all 0.3s;
             font-weight: 500;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            outline: none;
         }
 
         #run-button:hover {
@@ -287,6 +289,22 @@
             gap: 10px;
         }
 
+        .edit-btn {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+
+        .edit-btn:hover {
+            background: #2980b9;
+            transform: scale(1.05);
+        }
+
         .delete-btn {
             background: #e74c3c;
             color: white;
@@ -310,6 +328,40 @@
             color: #a89b8a;
         }
 
+        /* 用户控制区 */
+        .user-controls {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+            z-index: 1000;
+        }
+
+        .user-btn {
+            padding: 8px 15px;
+            border-radius: 20px;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .login-btn {
+            background-color: #d4b78f;
+            color: white;
+        }
+
+        .logout-btn {
+            background-color: #e74c3c;
+            color: white;
+        }
+
+        .user-btn:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+
         /* 响应式设计 */
         @media (max-width: 768px) {
             #sidebar {
@@ -322,16 +374,27 @@
                 margin-left: 0;
                 padding: 20px;
             }
+            .user-controls {
+                position: static;
+                margin-bottom: 20px;
+                justify-content: flex-end;
+            }
         }
     </style>
 </head>
 <body>
+    <!-- 用户控制区 -->
+    <div class="user-controls" id="user-controls">
+        <button class="login-btn" id="login-btn" onclick="location.href='auth.html'">登录/注册</button>
+        <button class="logout-btn" id="logout-btn" onclick="logout()" style="display: none;">登出</button>
+    </div>
+
     <!-- 侧边栏 -->
     <div id="sidebar">
         <h2>Woj导航</h2>
         <button onclick="location.hash=''">🏠 主页</button>
         <button onclick="location.hash='#problem'">📚 题库</button>
-        <button onclick="location.href='newproblem.html'" style="margin-top: 25px; background-color: #d4b78f; color: white;">✚ 新建题目</button>
+        <button id="new-problem-btn" onclick="location.href='newproblem.html'" style="margin-top: 25px; background-color: #d4b78f; color: white; display: none;">✚ 新建题目</button>
     </div>
 
     <!-- 主内容区 -->
@@ -391,7 +454,7 @@
         <div id="problem-list" style="display: none;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                 <h2>📚 题库列表</h2>
-                <button onclick="location.href='newproblem.html'" style="padding: 10px 15px; background-color: #d4b78f; color: white;">✚ 新建题目</button>
+                <button id="new-problem-list-btn" onclick="location.href='newproblem.html'" style="padding: 10px 15px; background-color: #d4b78f; color: white; display: none;">✚ 新建题目</button>
             </div>
             <div id="problems-container"></div>
         </div>
@@ -414,22 +477,69 @@
         // 从localStorage加载题目或初始化空题库
         let problems = JSON.parse(localStorage.getItem('woj_problems')) || {};
 
+        // 检查登录状态并更新UI
+        function checkAuth() {
+            const user = JSON.parse(localStorage.getItem('woj_currentUser'));
+            const loginBtn = document.getElementById('login-btn');
+            const logoutBtn = document.getElementById('logout-btn');
+            const newProblemBtn = document.getElementById('new-problem-btn');
+            const newProblemListBtn = document.getElementById('new-problem-list-btn');
+            
+            if (user) {
+                loginBtn.style.display = 'none';
+                logoutBtn.style.display = 'block';
+                
+                // 只有0号用户可以看到新建题目按钮
+                if (user.userId === 0) {
+                    newProblemBtn.style.display = 'block';
+                    if (newProblemListBtn) newProblemListBtn.style.display = 'block';
+                } else {
+                    newProblemBtn.style.display = 'none';
+                    if (newProblemListBtn) newProblemListBtn.style.display = 'none';
+                }
+            } else {
+                loginBtn.style.display = 'block';
+                logoutBtn.style.display = 'none';
+                newProblemBtn.style.display = 'none';
+                if (newProblemListBtn) newProblemListBtn.style.display = 'none';
+            }
+        }
+
+        // 登出函数
+        function logout() {
+            localStorage.removeItem('woj_currentUser');
+            location.href = 'auth.html';
+        }
+
         // 渲染题库列表
         function renderProblemList() {
             const container = document.getElementById('problems-container');
             container.innerHTML = '';
             
-            const sortedIds = Object.keys(problems).sort((a, b) => 
-                parseInt(a.substring(1)) - parseInt(b.substring(1)));
+            const user = JSON.parse(localStorage.getItem('woj_currentUser'));
+            const isAdmin = user && user.userId === 0;
+            
+            const sortedIds = Object.keys(problems).sort((a, b) => {
+                // 按照题目类型和编号排序
+                const typeA = a.charAt(0);
+                const numA = parseInt(a.substring(1));
+                const typeB = b.charAt(0);
+                const numB = parseInt(b.substring(1));
+                
+                if (typeA !== typeB) return typeA.localeCompare(typeB);
+                return numA - numB;
+            });
             
             if (sortedIds.length === 0) {
                 container.innerHTML = `
                     <div class="empty-state">
                         <p style="font-size: 16px; color: #a89b8a;">题库为空</p>
+                        ${isAdmin ? `
                         <button onclick="location.href='newproblem.html'" 
                                 style="margin-top: 15px; padding: 10px 20px; background-color: #d4b78f; color: white;">
                             创建第一道题目
                         </button>
+                        ` : ''}
                     </div>
                 `;
                 return;
@@ -437,16 +547,23 @@
             
             sortedIds.forEach(id => {
                 const problem = problems[id];
+                const isOwner = user && problem.creatorId === user.userId;
+                const canEdit = isAdmin || isOwner;
+                
                 const item = document.createElement('div');
                 item.className = 'problem-item';
                 item.innerHTML = `
                     <div style="flex: 1; display: flex; align-items: center;" onclick="loadProblem('${id}')">
                         <span class="problem-id">${id}</span>
-                        <span class="problem-name" style="margin-left: 15px;">${problem.title.split('|')[1]?.trim() || problem.title}</span>
+                        <span class="problem-name" style="margin-left: 15px;">${problem.title}</span>
+                        ${problem.creatorId !== undefined ? `<span style="font-size: 12px; color: #a89b8a; margin-left: 10px;">(创建者: ${problem.creatorId})</span>` : ''}
                     </div>
+                    ${canEdit ? `
                     <div class="problem-actions">
+                        <button class="edit-btn" onclick="editProblem('${id}', event)">编辑</button>
                         <button class="delete-btn" onclick="deleteProblem('${id}', event)">删除</button>
                     </div>
+                    ` : ''}
                 `;
                 container.appendChild(item);
             });
@@ -459,7 +576,7 @@
             if (!problem) return;
             
             document.getElementById("problem-container").style.display = "block";
-            document.getElementById("current-problem-title").textContent = problem.title;
+            document.getElementById("current-problem-title").textContent = `${id} | ${problem.title}`;
             document.getElementById("current-problem-content").innerHTML = problem.description;
             document.getElementById("home-page").style.display = "block";
             document.getElementById("problem-list").style.display = "none";
@@ -469,9 +586,31 @@
             document.getElementById("result").innerHTML = "请先编写代码并点击运行";
         }
 
+        // 编辑题目
+        function editProblem(id, event) {
+            event.stopPropagation();
+            const user = JSON.parse(localStorage.getItem('woj_currentUser'));
+            const problem = problems[id];
+            
+            if (!user || (user.userId !== 0 && problem.creatorId !== user.userId)) {
+                alert('您没有权限编辑此题目');
+                return;
+            }
+            
+            location.href = `newproblem.html?edit=${id}`;
+        }
+
         // 删除题目
         function deleteProblem(id, event) {
             event.stopPropagation();
+            const user = JSON.parse(localStorage.getItem('woj_currentUser'));
+            const problem = problems[id];
+            
+            if (!user || (user.userId !== 0 && problem.creatorId !== user.userId)) {
+                alert('您没有权限删除此题目');
+                return;
+            }
+            
             if (confirm(`确定要删除题目 ${id} 吗？此操作不可撤销！`)) {
                 delete problems[id];
                 localStorage.setItem('woj_problems', JSON.stringify(problems));
@@ -569,7 +708,10 @@
         }
 
         // 初始化
-        window.addEventListener('load', handleRoute);
+        window.addEventListener('load', function() {
+            checkAuth();
+            handleRoute();
+        });
         window.addEventListener('hashchange', handleRoute);
     </script>
 </body>
