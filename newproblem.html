@@ -3,53 +3,24 @@
 <head>
     <title>创建题目 - Woj</title>
     <style>
-        body { 
-            font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #f8f9fa;
             margin: 0;
             padding: 0;
-            background-color: #f8f9fa;
-            color: #333;
+            display: flex;
         }
         
         .sidebar {
-            width: 200px;
-            background-color: #f5efe6;
+            width: 220px;
+            background: #f5efe6;
             height: 100vh;
             padding: 25px 20px;
-            position: fixed;
             border-right: 1px solid #e0d6c2;
         }
         
-        .sidebar h2 {
-            color: #8b6b4a;
-            border-bottom: 2px solid #d4b78f;
-            padding-bottom: 12px;
-            margin-top: 0;
-        }
-        
-        .sidebar button {
-            display: block;
-            width: 100%;
-            padding: 12px 15px;
-            margin-bottom: 12px;
-            background-color: #e8d5b5;
-            color: #5a4a3a;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 15px;
-            text-align: left;
-            transition: all 0.3s;
-            outline: none;
-        }
-        
-        .sidebar button:hover {
-            background-color: #d4b78f;
-            color: white;
-        }
-        
         .main-content {
-            margin-left: 240px;
+            flex: 1;
             padding: 30px;
             max-width: 900px;
         }
@@ -57,35 +28,17 @@
         .form-container {
             background: white;
             padding: 30px;
-            border-radius: 8px;
+            border-radius: 12px;
             box-shadow: 0 2px 15px rgba(0,0,0,0.05);
-            border: 1px solid #eee;
         }
         
-        h1 {
-            color: #8b6b4a;
-            margin-top: 0;
-        }
-        
-        .form-group {
-            margin-bottom: 25px;
-        }
-        
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 500;
-            color: #5a4a3a;
-        }
-        
-        input, textarea, select {
+        input, textarea {
             width: 100%;
             padding: 12px;
             border: 1px solid #e0d6c2;
-            border-radius: 6px;
-            font-family: inherit;
-            font-size: 15px;
-            background-color: #f9f5f0;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 16px;
         }
         
         textarea {
@@ -95,114 +48,78 @@
         .button-group {
             display: flex;
             gap: 15px;
-            margin-top: 30px;
         }
         
-        .save-btn {
-            background-color: #d4b78f;
-            color: white;
+        button {
             padding: 12px 25px;
             border: none;
-            border-radius: 6px;
+            border-radius: 8px;
             cursor: pointer;
             font-size: 16px;
-            transition: all 0.3s;
         }
         
-        .save-btn:hover {
-            background-color: #c0a378;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        }
-        
-        .cancel-btn {
-            background-color: #95a5a6;
+        .btn-primary {
+            background: #8b6b4a;
             color: white;
-            padding: 12px 25px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 16px;
-            transition: all 0.3s;
-        }
-        
-        .cancel-btn:hover {
-            background-color: #7f8c8d;
-        }
-        
-        @media (max-width: 768px) {
-            .sidebar {
-                width: 100%;
-                height: auto;
-                position: relative;
-            }
-            .main-content {
-                margin-left: 0;
-                padding: 20px;
-            }
         }
     </style>
 </head>
 <body>
     <div class="sidebar">
         <h2>题目管理</h2>
-        <button onclick="location.href='index.html'">← 返回主页</button>
+        <a href="index.html" style="display: block; padding: 12px; background: #e8d5b5; border-radius: 8px; text-decoration: none; color: #5a4a3a; margin-bottom: 12px;">← 返回主页</a>
     </div>
 
     <div class="main-content">
         <div class="form-container">
-            <h1 id="form-title">创建新题目</h1>
+            <h1 id="form-title" style="color: #8b6b4a;">创建新题目</h1>
             
-            <div class="form-group">
-                <label for="title">题目名称</label>
-                <input type="text" id="title" required placeholder="例如: A+B Problem">
+            <div id="custom-id-container" style="display: none;">
+                <label>自定义题号（仅站长）</label>
+                <input type="text" id="custom-id">
             </div>
             
-            <div id="custom-id-container" class="form-group" style="display: none;">
-                <label for="custom-id">自定义题号 (仅管理员)</label>
-                <input type="text" id="custom-id" placeholder="例如: A001">
+            <div>
+                <label>题目名称</label>
+                <input type="text" id="title" required>
             </div>
             
-            <div class="form-group">
-                <label for="description">题目描述 (Markdown格式)</label>
-                <textarea id="description" required placeholder="## 题目描述\n输入两个整数..."></textarea>
+            <div>
+                <label>题目描述（Markdown）</label>
+                <textarea id="description" required></textarea>
             </div>
             
-            <div class="form-group">
-                <label for="template">代码模板</label>
-                <textarea id="template" required placeholder="#include &lt;iostream&gt;\nusing namespace std;\n\nint main() {\n    // 你的代码\n    return 0;\n}"></textarea>
+            <div>
+                <label>代码模板</label>
+                <textarea id="template" required></textarea>
             </div>
             
             <div class="button-group">
-                <button class="save-btn" onclick="saveProblem()">💾 保存题目</button>
-                <button class="cancel-btn" onclick="location.href='index.html'">✖ 取消</button>
+                <button class="btn-primary" onclick="saveProblem()">保存题目</button>
+                <button onclick="location.href='index.html'">取消</button>
             </div>
         </div>
     </div>
 
     <script>
-        // 检查URL参数，判断是新建还是编辑
-        const params = new URLSearchParams(window.location.search);
-        const editId = params.get('edit');
         const user = JSON.parse(localStorage.getItem('woj_currentUser'));
-        
         if (!user) {
-            alert('请先登录');
             location.href = 'auth.html';
         }
         
-        // 如果是管理员，显示自定义题号输入框
-        if (user && user.userId === 0) {
+        // 如果是站长，显示自定义题号输入框
+        if (user.userId === 0) {
             document.getElementById('custom-id-container').style.display = 'block';
         }
         
         // 如果是编辑模式，加载题目数据
+        const params = new URLSearchParams(location.search);
+        const editId = params.get('edit');
+        const problems = JSON.parse(localStorage.getItem('woj_problems')) || {};
+        
         if (editId) {
-            const problems = JSON.parse(localStorage.getItem('woj_problems')) || {};
             const problem = problems[editId];
-            
             if (problem) {
-                document.title = `编辑题目 - ${editId} | Woj`;
                 document.getElementById('form-title').textContent = `编辑题目 ${editId}`;
                 document.getElementById('title').value = problem.title;
                 document.getElementById('description').value = problem.description;
@@ -211,56 +128,42 @@
         }
         
         function saveProblem() {
-            const user = JSON.parse(localStorage.getItem('woj_currentUser'));
-            if (!user) {
-                alert('请先登录');
-                location.href = 'auth.html';
-                return;
-            }
-            
             const title = document.getElementById('title').value.trim();
             const description = document.getElementById('description').value.trim();
             const template = document.getElementById('template').value.trim();
-            const customId = document.getElementById('custom-id')?.value.trim();
             
             if (!title || !description || !template) {
-                alert('请填写所有必填字段');
+                alert('请填写所有字段');
                 return;
             }
             
-            let problems = JSON.parse(localStorage.getItem('woj_problems')) || {};
             let problemId;
-            
-            if (editId) {
-                // 编辑现有题目
+            if (user.userId === 0 && editId) {
+                // 站长编辑现有题目
                 problemId = editId;
-            } else if (user.userId === 0 && customId) {
-                // 管理员自定义题号
-                if (problems[customId]) {
+            } else if (user.userId === 0 && document.getElementById('custom-id').value) {
+                // 站长自定义题号
+                problemId = document.getElementById('custom-id').value.trim();
+                if (problems[problemId] && !editId) {
                     alert('该题号已存在');
                     return;
                 }
-                problemId = customId;
             } else {
-                // 普通用户自动分配U+四位数的题号
-                const userProblems = Object.entries(problems)
-                    .filter(([id, p]) => id.startsWith('U') && p.creatorId === user.userId);
-                
-                const nextNum = userProblems.length > 0 ? 
-                    Math.max(...userProblems.map(([id]) => parseInt(id.substring(1)))) + 1 : 1;
+                // 普通用户或自动生成题号
+                const userProblems = Object.keys(problems).filter(id => id.startsWith('U') && problems[id].creatorId === user.userId);
+                const nextNum = userProblems.length + 1;
                 problemId = 'U' + nextNum.toString().padStart(4, '0');
             }
             
-            // 添加/更新题目
             problems[problemId] = {
-                title: title,
-                description: description,
-                template: template,
+                title,
+                description,
+                template,
                 creatorId: user.userId
             };
             
             localStorage.setItem('woj_problems', JSON.stringify(problems));
-            alert(`题目 ${problemId} ${editId ? '更新' : '创建'}成功！`);
+            alert(`题目 ${problemId} 保存成功！`);
             location.href = `index.html#problem/${problemId}`;
         }
     </script>
