@@ -4,29 +4,22 @@
     <title>登录/注册 - Woj</title>
     <style>
         body {
-            font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
-            margin: 0;
-            padding: 0;
+            font-family: 'Segoe UI', sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            background-color: #f8f9fa;
+            background: #f8f9fa;
+            margin: 0;
         }
         
         .auth-container {
             background: white;
-            padding: 40px;
-            border-radius: 10px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
             width: 100%;
             max-width: 400px;
-        }
-        
-        h1 {
-            color: #8b6b4a;
-            text-align: center;
-            margin-bottom: 30px;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
         }
         
         .tabs {
@@ -36,63 +29,45 @@
         }
         
         .tab {
-            padding: 10px 20px;
-            cursor: pointer;
             flex: 1;
             text-align: center;
+            padding: 12px;
+            cursor: pointer;
             border-bottom: 3px solid transparent;
         }
         
         .tab.active {
-            border-bottom-color: #d4b78f;
+            border-bottom-color: #8b6b4a;
             font-weight: 500;
-            color: #8b6b4a;
         }
         
         .form-group {
             margin-bottom: 20px;
         }
         
-        label {
-            display: block;
-            margin-bottom: 8px;
-            color: #5a4a3a;
-        }
-        
         input {
             width: 100%;
             padding: 12px;
             border: 1px solid #e0d6c2;
-            border-radius: 6px;
-            font-size: 15px;
+            border-radius: 8px;
+            font-size: 16px;
         }
         
         button {
             width: 100%;
             padding: 12px;
-            background-color: #d4b78f;
+            background: #8b6b4a;
             color: white;
             border: none;
-            border-radius: 6px;
+            border-radius: 8px;
             font-size: 16px;
             cursor: pointer;
-            transition: all 0.3s;
-        }
-        
-        button:hover {
-            background-color: #c0a378;
-        }
-        
-        .error {
-            color: #e74c3c;
-            font-size: 14px;
-            margin-top: 5px;
         }
     </style>
 </head>
 <body>
     <div class="auth-container">
-        <h1>Woj 信息竞赛平台</h1>
+        <h1 style="text-align: center; color: #8b6b4a;">Woj OJ系统</h1>
         
         <div class="tabs">
             <div class="tab active" onclick="switchTab('login')">登录</div>
@@ -101,38 +76,24 @@
         
         <div id="login-form">
             <div class="form-group">
-                <label for="login-username">用户名</label>
-                <input type="text" id="login-username" placeholder="输入用户名">
+                <input type="text" id="login-username" placeholder="用户名">
             </div>
-            
             <div class="form-group">
-                <label for="login-password">密码</label>
-                <input type="password" id="login-password" placeholder="输入密码">
+                <input type="password" id="login-password" placeholder="密码">
             </div>
-            
-            <div id="login-error" class="error"></div>
-            
             <button onclick="login()">登录</button>
         </div>
         
         <div id="register-form" style="display: none;">
             <div class="form-group">
-                <label for="register-username">用户名</label>
-                <input type="text" id="register-username" placeholder="输入用户名">
+                <input type="text" id="register-username" placeholder="用户名">
             </div>
-            
             <div class="form-group">
-                <label for="register-password">密码</label>
-                <input type="password" id="register-password" placeholder="输入密码 (至少6位)">
+                <input type="password" id="register-password" placeholder="密码（至少6位）">
             </div>
-            
             <div class="form-group">
-                <label for="register-confirm">确认密码</label>
-                <input type="password" id="register-confirm" placeholder="再次输入密码">
+                <input type="password" id="register-confirm" placeholder="确认密码">
             </div>
-            
-            <div id="register-error" class="error"></div>
-            
             <button onclick="register()">注册</button>
         </div>
     </div>
@@ -155,72 +116,64 @@
         function login() {
             const username = document.getElementById('login-username').value.trim();
             const password = document.getElementById('login-password').value.trim();
-            const errorEl = document.getElementById('login-error');
             
             if (!username || !password) {
-                errorEl.textContent = '请输入用户名和密码';
+                alert('请输入用户名和密码');
                 return;
             }
             
             const users = JSON.parse(localStorage.getItem('woj_users')) || [];
             const user = users.find(u => u.username === username && u.password === password);
             
-            if (!user) {
-                errorEl.textContent = '用户名或密码错误';
-                return;
+            if (user) {
+                localStorage.setItem('woj_currentUser', JSON.stringify(user));
+                location.href = 'index.html';
+            } else {
+                alert('用户名或密码错误');
             }
-            
-            // 保存登录状态
-            localStorage.setItem('woj_currentUser', JSON.stringify(user));
-            window.location.href = 'index.html';
         }
         
         function register() {
             const username = document.getElementById('register-username').value.trim();
             const password = document.getElementById('register-password').value.trim();
             const confirm = document.getElementById('register-confirm').value.trim();
-            const errorEl = document.getElementById('register-error');
             
             if (!username || !password || !confirm) {
-                errorEl.textContent = '请填写所有字段';
+                alert('请填写所有字段');
                 return;
             }
             
             if (password !== confirm) {
-                errorEl.textContent = '两次输入的密码不一致';
+                alert('两次输入的密码不一致');
                 return;
             }
             
             if (password.length < 6) {
-                errorEl.textContent = '密码长度至少为6位';
+                alert('密码长度至少为6位');
                 return;
             }
             
             let users = JSON.parse(localStorage.getItem('woj_users')) || [];
             
             if (users.some(u => u.username === username)) {
-                errorEl.textContent = '用户名已存在';
+                alert('用户名已存在');
                 return;
             }
             
-            // 自动分配用户ID
-            const nextUserId = users.length > 0 ? 
-                Math.max(...users.map(u => u.userId)) + 1 : 0;
+            const nextUserId = users.length > 0 ? Math.max(...users.map(u => u.userId)) + 1 : 0;
             
             const newUser = {
                 userId: nextUserId,
                 username,
                 password,
-                createdAt: new Date().toISOString(),
-                isAdmin: nextUserId === 0 // 第一个用户是管理员
+                isAdmin: nextUserId === 0,
+                createdAt: new Date().toISOString()
             };
             
             users.push(newUser);
             localStorage.setItem('woj_users', JSON.stringify(users));
-            
-            // 自动登录
             localStorage.setItem('woj_currentUser', JSON.stringify(newUser));
-            window.location.href = 'index.html';
+            location.href = 'index.html';
         }
     </script>
 </body>
