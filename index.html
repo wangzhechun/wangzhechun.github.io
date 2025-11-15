@@ -199,11 +199,10 @@
   </style>
 </head>
 <body class="bg-gray-100 min-h-screen font-inter">
-<div class="relative w-full min-h-screen overflow-hidden" style="min-height: 100vh; display: flex; flex-direction: column;">
-    <!-- 背景图 -->
-    <div class="absolute inset-0 z-0">
-      <img src="https://p3-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/rc/pc/super_tool/4dca70059ce044bfbbfe7294d42d7211~tplv-a9rns2rl98-image.image?rcl=202510231052564D481AD8A531CFEB2552&rk3s=8e244e95&rrcfp=f06b921b&x-expires=1763780135&x-signature=sNnOoVVmzXx%2BzEC4MTc3rBnxWMQ%3D" alt="水墨山水背景" class="w-full h-full object-cover opacity-50" style="border: none;">
-    </div>
+<!-- 粒子背景 -->
+<canvas id="particlesCanvas" class="fixed top-0 left-0 w-full h-full z-0"></canvas>
+
+<div class="relative w-full min-h-screen overflow-hidden" style="min-height: 100vh; display: flex; flex-direction: column; background-color: #0F172A; background-image: radial-gradient(circle at 25% 25%, rgba(59, 130, 246, 0.1) 0%, transparent 50%), radial-gradient(circle at 75% 75%, rgba(139, 92, 246, 0.1) 0%, transparent 50%);">
 
     <!-- 主容器 -->
     <div class="relative z-10 container mx-auto px-4 py-8 md:py-12 max-w-6xl flex-grow flex flex-col">
@@ -212,7 +211,101 @@
         <div class="flex justify-center items-center relative">
           <h1 class="text-3xl md:text-4xl font-inter text-primary">博远FJ 2048</h1>
           <div class="absolute right-0 md:right-auto md:left-full md:ml-4 top-0 transform md:translate-x-0 translate-x-16 -translate-y-4 bg-white px-2 py-1 rounded">
-            <span class="text-lg font-inter text-red-800">石记</span>
+            <span class="text-lg font-inter text-red-800">者淳</span>
+          </div>
+        </div>
+        <p class="mt-4 text-lg text-gray-700 max-w-2xl mx-auto font-inter">从汪蔡开始，层层递进，合成韩总及以上！</p>
+      </header>
+
+      <!-- 主要内容区 -->
+      <div class="flex flex-col md:flex-row justify-center items-start gap-8 mt-8">
+        <!-- 游戏棋盘区 -->
+        <div class="relative">
+          <div class="game-container bg-black bg-opacity-80 rounded-lg p-4 shadow-lg border-2 border-black" style="box-shadow: 0 10px 25px rgba(0,0,0,0.5), 0 6px 12px rgba(0,0,0,0.3), inset 0 1px 3px rgba(255,255,255,0.1);">
+            <div class="grid grid-cols-4 gap-3 bg-black bg-opacity-50 rounded-md p-3" id="game-board" style="max-width: 500px; width: 100%; aspect-ratio: 1/1; margin: 0 auto;">
+              <!-- 棋盘格子将通过JS动态生成 -->
+            </div>
+
+            <!-- 分数区域 -->
+            <div class="flex justify-between mt-4 text-white">
+              <div class="score-container bg-black bg-opacity-60 rounded-md px-4 py-2 flex items-center">
+                <span class="mr-2">当前分数:</span>
+                <span id="score" class="font-bold">0</span>
+              </div>
+              <div class="score-container bg-black bg-opacity-60 rounded-md px-4 py-2 flex items-center">
+                <span class="mr-2">最高分:</span>
+                <span id="best-score" class="font-bold">0</span>
+              </div>
+            </div>
+
+            <!-- 操作按钮 -->
+            <div class="flex justify-center gap-4 mt-4">
+              <button id="new-game" class="btn-2048 bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-700 hover:to-blue-900">
+                开始新游戏
+              </button>
+              <button id="undo" class="btn-2048 bg-gradient-to-r from-purple-600 to-purple-800 hover:from-purple-700 hover:to-purple-900">
+                细品一下
+              </button>
+            </div>
+            
+            <!-- 创作者信息 -->
+            <div class="text-center mt-4 text-xs text-black">
+              <p>创作者：王者淳</p>
+              <p>吉祥物：王者淳的小猫花花</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 游戏规则和说明 -->
+        <div class="md:w-72 lg:w-80">
+          <div class="rules-list bg-white bg-opacity-90 rounded-lg p-4 shadow-lg">
+            <h2 class="text-xl font-bold mb-4">游戏规则</h2>
+            <ul class="space-y-2">
+              <li class="rule-item">
+                <i class="fa fa-arrow-up text-primary"></i>
+                <span>使用 <strong>↑↓←→</strong> 或 <strong>WASD</strong> 键移动方块</span>
+              </li>
+              <li class="rule-item">
+                <i class="fa fa-plus text-primary"></i>
+                <span>相同数字的方块相撞时会 <strong>合并</strong> 成为它们的和</span>
+              </li>
+              <li class="rule-item">
+                <i class="fa fa-star text-primary"></i>
+                <span>每次移动后会随机生成一个 <strong>2</strong> 或 <strong>4</strong></span>
+              </li>
+              <li class="rule-item">
+                <i class="fa fa-trophy text-primary"></i>
+                <span>目标是合成 <strong>王者淳</strong> (65536)</span>
+              </li>
+              <li class="rule-item">
+                <i class="fa fa-undo text-primary"></i>
+                <span>点击"细品一下"可以悔棋一步</span>
+              </li>
+            </ul>
+          </div>
+
+          <!-- 等级说明 -->
+          <div class="rules-list bg-white bg-opacity-90 rounded-lg p-4 shadow-lg mt-4">
+            <h2 class="text-xl font-bold mb-4">等级说明</h2>
+            <div class="overflow-y-auto max-h-60">
+              <div class="grid grid-cols-2 gap-2" id="level-guide">
+                <!-- 等级说明将通过JS动态生成 -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+    <!-- 主容器 -->
+    <div class="relative z-10 container mx-auto px-4 py-8 md:py-12 max-w-6xl flex-grow flex flex-col">
+      <!-- 标题区 -->
+      <header class="mb-8 text-center">
+        <div class="flex justify-center items-center relative">
+          <h1 class="text-3xl md:text-4xl font-inter text-primary">博远FJ 2048</h1>
+          <div class="absolute right-0 md:right-auto md:left-full md:ml-4 top-0 transform md:translate-x-0 translate-x-16 -translate-y-4 bg-white px-2 py-1 rounded">
+            <span class="text-lg font-inter text-red-800">者淳</span>
           </div>
         </div>
         <p class="mt-4 text-lg text-gray-700 max-w-2xl mx-auto font-inter">从汪蔡开始，层层递进，合成韩总及以上！</p>
@@ -255,37 +348,17 @@
 
         <!-- 右侧游戏规则介绍 -->
         <div class="w-full md:w-64 glass-effect rounded-lg p-6" style="min-height: 530px; align-self: flex-start; box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);">
-          <h2 class="text-2xl font-inter text-center mb-4 ink-stroke inline-block relative" style="font-size: 20px;">游戏规则</h2>
+          <h2 class="text-2xl font-inter text-center mb-4 inline-block relative" style="font-size: 20px;">游戏规则</h2>
           
           <div class="space-y-4 mt-6">
             <div class="rule-item">
-              <i class="fa fa-arrows"></i>
-              <p class="font-inter">使用键盘方向键 ↑ ↓ ← → 或 WASD 或触摸滑动来移动方块</p>
-            </div>
-            
-            <div class="rule-item">
-              <i class="fa fa-plus"></i>
-              <p class="font-inter">相同数字的方块相撞时会合并成为它们的和</p>
-            </div>
-            
-            <div class="rule-item">
-              <i class="fa fa-refresh"></i>
-              <p class="font-inter">每次移动后，棋盘上会随机生成一个新的方块</p>
-            </div>
-            
-            <div class="rule-item">
-              <i class="fa fa-trophy"></i>
-              <p class="font-inter">合并出"王者淳"（65536）即可获得胜利</p>
-            </div>
-            
-            <div class="rule-item">
-              <i class="fa fa-times"></i>
-              <p class="font-inter">当棋盘被方块填满且无法移动时，游戏结束</p>
-            </div>
-            
-            <div class="rule-item">
               <i class="fa fa-undo"></i>
-              <p class="font-inter">点击"细品一下"按钮可以悔棋一次</p>
+              <p class="font-inter">点击"细品一下"按钮可以悔棋一次，帮助你纠正错误的移动</p>
+            </div>
+            
+            <div class="rule-item">
+              <i class="fa fa-users"></i>
+              <p class="font-inter">人物等级：汪蔡(2) → 党哥(4) → 凯皇(8) → 百鸡(16) → 钊君(32) → 崇玉妹妹(64) → 熊易燃(128) → 小猪初初(256) → 马赫(512) → 胡班(1024) → 心姐(2048) → 肥美(4096) → 姜爷(8192) → 韩总(16384) → 张亦哲(32768) → 王者淳(65536)</p>
             </div>
           </div>
           
@@ -294,36 +367,13 @@
             <i class="fa fa-undo mr-2"></i>细品一下
           </button>
           
-          <!-- 人物等级说明 -->
-          <div class="mt-8">
-            <h3 class="text-lg font-inter mb-2 ink-stroke inline-block relative" style="font-size: 18px;">人物等级</h3>
-            <div class="bg-white bg-opacity-50 rounded p-3 max-h-40 overflow-y-auto text-sm">
-              <div class="grid grid-cols-2 gap-1">
-                <div>2-汪蔡</div>
-                <div>4-党哥</div>
-                <div>8-凯皇</div>
-                <div>16-百鸡</div>
-                <div>32-钊君</div>
-                <div>64-崇玉妹妹</div>
-                <div>128-熊易燃</div>
-                <div>256-小猪初初</div>
-                <div>512-马赫</div>
-                <div>1024-胡班</div>
-                <div>2048-心姐</div>
-                <div>4096-肥美</div>
-                <div>8192-姜爷</div>
-                <div>16384-韩总</div>
-                <div>32768-张亦哲</div>
-                <div>65536-王者淳</div>
-              </div>
-            </div>
+          <!-- 创作者信息 -->
+          <div class="mt-6 text-center text-black text-xs">
+            <p>创作者：王者淳</p>
+            <p>吉祥物：王者淳的小猫花花</p>
           </div>
-        </div>
-      </div>
 
-      <!-- 操作提示 -->
-      <div class="mt-12 text-center text-gray-600 text-sm">
-        <p class="font-inter">操作方式：键盘方向键 ↑ ↓ ← → 或 WASD 或触摸滑动</p>
+        </div>
       </div>
     </div>
   </div>
@@ -333,82 +383,66 @@
     const characterConfig = {
       2: {
         name: "汪蔡",
-        description: "小丫鬟",
         image: "https://p3-flow-imagex-sign.byteimg.com/ocean-cloud-tos/image_generation/43ef289bd0080031fc20c9f11722f4e0_1761190154418508276.jpeg~tplv-a9rns2rl98-image.jpeg?rk3s=25bff839&x-expires=2076550154&x-signature=VTlqMCxlfnmWQBdPb9X0o3LLObc%3D"
       },
       4: {
         name: "党哥",
-        description: "侍女",
         image: "https://p9-flow-imagex-sign.byteimg.com/ocean-cloud-tos/image_generation/70c784fea2cfbc20ef37cd6e43d00777_1761190243880047748.jpeg~tplv-a9rns2rl98-image.jpeg?rk3s=25bff839&x-expires=2076550243&x-signature=fuHcLlYWJT59Q2ZAmXbUpeThidw%3D"
       },
       8: {
         name: "凯皇",
-        description: "少妇",
         image: "https://p3-flow-imagex-sign.byteimg.com/ocean-cloud-tos/image_generation/fa41bdb6766e539a1067eeae7cf4a1a9_1761190262480995207.jpeg~tplv-a9rns2rl98-image.jpeg?rk3s=25bff839&x-expires=2076550262&x-signature=f6CuFXJqt8bhD9djwsDoR2%2FcrVM%3D"
       },
       16: {
         name: "百鸡",
-        description: "小姐",
         image: "https://p3-flow-imagex-sign.byteimg.com/ocean-cloud-tos/image_generation/c9e5d8f437eeb4e2c56aae0c2dac7fff_1761190325720735708.jpeg~tplv-a9rns2rl98-image.jpeg?rk3s=25bff839&x-expires=2076550326&x-signature=ofA%2FffK%2B2s92Kmm4I%2F%2FRVlyRQOE%3D"
       },
       32: {
         name: "钊君",
-        description: "小姐",
         image: "https://p9-flow-imagex-sign.byteimg.com/ocean-cloud-tos/image_generation/b459218b29a016888891f65323ffa076_1761190344944765585.jpeg~tplv-a9rns2rl98-image.jpeg?rk3s=25bff839&x-expires=2076550345&x-signature=0f44RTTCuRzvl9PwQH0qnmonun0%3D"
       },
       64: {
         name: "崇玉妹妹",
-        description: "小姐",
         image: "https://p3-flow-imagex-sign.byteimg.com/ocean-cloud-tos/image_generation/f1896a7199b09bdc0fb1a9491fdab79b_1761190362759187649.jpeg~tplv-a9rns2rl98-image.jpeg?rk3s=25bff839&x-expires=2076550362&x-signature=3iesarW0FZZHmiz4ggUa6tieSuI%3D"
       },
       128: {
         name: "熊易燃",
-        description: "才女",
         image: "https://p9-flow-imagex-sign.byteimg.com/ocean-cloud-tos/image_generation/383e27481757a303661c768a16283333_1761190377392210340.jpeg~tplv-a9rns2rl98-image.jpeg?rk3s=25bff839&x-expires=2076550377&x-signature=AA4IYmJcyt%2B5uJvnn22NBnn5qto%3D"
       },
       256: {
         name: "小猪初初",
-        description: "淑女",
         image: "https://p3-flow-imagex-sign.byteimg.com/ocean-cloud-tos/image_generation/0fb9f4c3e8c5da17de4f6a81877194fc_1761190395126585144.jpeg~tplv-a9rns2rl98-image.jpeg?rk3s=25bff839&x-expires=2076550395&x-signature=VVWQI45pr31ZEk4xeFklJjtO7t8%3D"
       },
       512: {
         name: "马赫",
-        description: "少奶奶",
         image: "https://p3-flow-imagex-sign.byteimg.com/ocean-cloud-tos/image_generation/6a159de12d6b3552a8d3a75bcaabe3ba_1761190419632157406.jpeg~tplv-a9rns2rl98-image.jpeg?rk3s=25bff839&x-expires=2076550419&x-signature=t4v0Sl%2F7N4nxWXXblFHK5o3f2%2B4%3D"
       },
       1024: {
         name: "胡班",
-        description: "老太太",
         image: "https://p3-flow-imagex-sign.byteimg.com/ocean-cloud-tos/image_generation/58205310564e2adba5708bef8fb45876_1761190437825693286.jpeg~tplv-a9rns2rl98-image.jpeg?rk3s=25bff839&x-expires=2076550437&x-signature=PZFj7rjTADDcF%2FySeIKzQ1sFB4U%3D"
       },
       2048: {
         name: "心姐",
-        description: "仙女",
         image: "https://p3-flow-imagex-sign.byteimg.com/ocean-cloud-tos/image_generation/a35f6b024e0f984ab97775a1da732d27_1761190462790562252.jpeg~tplv-a9rns2rl98-image.jpeg?rk3s=25bff839&x-expires=2076550462&x-signature=leCWoQs3ZMDMkYJEGvJgcaXJdJk%3D"
       },
       4096: {
         name: "肥美",
-        description: "仙女",
         image: "https://p3-flow-imagex-sign.byteimg.com/ocean-cloud-tos/image_generation/a35f6b024e0f984ab97775a1da732d27_1761190462790562252.jpeg~tplv-a9rns2rl98-image.jpeg?rk3s=25bff839&x-expires=2076550462&x-signature=leCWoQs3ZMDMkYJEGvJgcaXJdJk%3D"
       },
       8192: {
         name: "姜爷",
-        description: "仙女",
         image: "https://p3-flow-imagex-sign.byteimg.com/ocean-cloud-tos/image_generation/a35f6b024e0f984ab97775a1da732d27_1761190462790562252.jpeg~tplv-a9rns2rl98-image.jpeg?rk3s=25bff839&x-expires=2076550462&x-signature=leCWoQs3ZMDMkYJEGvJgcaXJdJk%3D"
       },
       16384: {
         name: "韩总",
-        description: "仙女",
         image: "https://p3-flow-imagex-sign.byteimg.com/ocean-cloud-tos/image_generation/a35f6b024e0f984ab97775a1da732d27_1761190462790562252.jpeg~tplv-a9rns2rl98-image.jpeg?rk3s=25bff839&x-expires=2076550462&x-signature=leCWoQs3ZMDMkYJEGvJgcaXJdJk%3D"
       },
       32768: {
         name: "张亦哲",
-        description: "仙女",
         image: "https://p3-flow-imagex-sign.byteimg.com/ocean-cloud-tos/image_generation/a35f6b024e0f984ab97775a1da732d27_1761190462790562252.jpeg~tplv-a9rns2rl98-image.jpeg?rk3s=25bff839&x-expires=2076550462&x-signature=leCWoQs3ZMDMkYJEGvJgcaXJdJk%3D"
       },
       65536: {
         name: "王者淳",
-        description: "仙女",
         image: "https://p3-flow-imagex-sign.byteimg.com/ocean-cloud-tos/image_generation/a35f6b024e0f984ab97775a1da732d27_1761190462790562252.jpeg~tplv-a9rns2rl98-image.jpeg?rk3s=25bff839&x-expires=2076550462&x-signature=leCWoQs3ZMDMkYJEGvJgcaXJdJk%3D"
       }
     };
@@ -421,8 +455,8 @@
         this.score = 0;
         this.bestScore = localStorage.getItem('bestScore') || 0;
         this.previousState = null; // 用于悔棋
-        this.won = false;
         this.over = false;
+        this.synthesizedLevels = new Set(); // 记录已合成的等级
 
         // 初始化DOM元素
         this.gameBoard = document.getElementById('game-board');
@@ -478,6 +512,9 @@
         this.won = false;
         this.over = false;
         this.gameMessage.classList.remove('game-won', 'game-over');
+        
+        // 重置已合成的角色记录
+        this.mergedCharacters = new Set();
       }
 
       // 保存当前状态用于悔棋
@@ -737,13 +774,17 @@
               }
 
               if (row > 0 && this.board[row - 1][j] === this.board[row][j]) {
-                this.board[row - 1][j] *= 2;
-                this.score += this.board[row - 1][j];
+                const mergedValue = this.board[row][j] * 2;
+                this.board[row - 1][j] = mergedValue;
+                this.score += mergedValue;
                 this.board[row][j] = 0;
                 moved = true;
 
                 // 播放合并音效
                 this.playMergeSound();
+                
+                // 显示合成提示
+                this.showMergeNotification(mergedValue);
               }
             }
           }
@@ -773,13 +814,17 @@
               }
 
               if (col < this.size - 1 && this.board[i][col + 1] === this.board[i][col]) {
-                this.board[i][col + 1] *= 2;
-                this.score += this.board[i][col + 1];
+                const mergedValue = this.board[i][col] * 2;
+                this.board[i][col + 1] = mergedValue;
+                this.score += mergedValue;
                 this.board[i][col] = 0;
                 moved = true;
 
                 // 播放合并音效
                 this.playMergeSound();
+                
+                // 显示合成提示
+                this.showMergeNotification(mergedValue);
               }
             }
           }
@@ -809,13 +854,17 @@
               }
 
               if (row < this.size - 1 && this.board[row + 1][j] === this.board[row][j]) {
-                this.board[row + 1][j] *= 2;
-                this.score += this.board[row + 1][j];
+                const mergedValue = this.board[row][j] * 2;
+                this.board[row + 1][j] = mergedValue;
+                this.score += mergedValue;
                 this.board[row][j] = 0;
                 moved = true;
 
                 // 播放合并音效
                 this.playMergeSound();
+                
+                // 显示合成提示
+                this.showMergeNotification(mergedValue);
               }
             }
           }
@@ -845,13 +894,17 @@
               }
 
               if (col > 0 && this.board[i][col - 1] === this.board[i][col]) {
-                this.board[i][col - 1] *= 2;
-                this.score += this.board[i][col - 1];
+                const mergedValue = this.board[i][col] * 2;
+                this.board[i][col - 1] = mergedValue;
+                this.score += mergedValue;
                 this.board[i][col] = 0;
                 moved = true;
 
                 // 播放合并音效
                 this.playMergeSound();
+                
+                // 显示合成提示
+                this.showMergeNotification(mergedValue);
               }
             }
           }
@@ -926,22 +979,6 @@
 
       // 检查游戏状态
       checkGameStatus() {
-        // 检查是否达成65536（王者淳）胜利
-        if (!this.won) {
-          for (let i = 0; i < this.size; i++) {
-            for (let j = 0; j < this.size; j++) {
-              if (this.board[i][j] === 65536) {
-                this.won = true;
-                this.messageText.textContent = '太虚幻境';
-                this.quoteText.textContent = '太虚幻境乃天上之境...「千红一哭，万艳同悲」';
-                this.gameMessage.classList.add('game-won');
-                this.continueBtn.classList.remove('hidden');
-                return;
-              }
-            }
-          }
-        }
-
         // 检查是否还有空格子
         for (let i = 0; i < this.size; i++) {
           for (let j = 0; j < this.size; j++) {
@@ -970,10 +1007,34 @@
 
         // 没有空格子且没有可合并的棋子，游戏结束
         this.over = true;
-        this.messageText.textContent = '盛筵必散';
-        this.quoteText.textContent = '盛筵必散，且待重来';
+        this.messageText.textContent = 'GAME OVER!';
+        this.quoteText.textContent = '';
         this.gameMessage.classList.add('game-over');
         this.continueBtn.classList.add('hidden');
+      }
+
+      // 显示合成提示
+      showMergeNotification(value) {
+        // 只在第一次合成该角色时显示提示
+        if (!this.synthesizedLevels.has(value)) {
+          this.synthesizedLevels.add(value);
+          
+          // 创建提示元素
+          const notification = document.createElement('div');
+          notification.className = 'fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-black bg-opacity-80 text-white px-6 py-3 rounded-lg text-xl font-bold z-50 animate-bounce';
+          notification.textContent = `恭喜你合成了${characterConfig[value].name}！`;
+          
+          // 添加到页面
+          document.body.appendChild(notification);
+          
+          // 2秒后移除
+          setTimeout(() => {
+            notification.classList.add('opacity-0', 'transition-opacity', 'duration-500');
+            setTimeout(() => {
+              document.body.removeChild(notification);
+            }, 500);
+          }, 2000);
+        }
       }
 
       // 设置事件监听器
@@ -1066,6 +1127,10 @@
 
     // 初始化游戏
     document.addEventListener('DOMContentLoaded', () => {
+      // 初始化粒子系统
+      const particleSystem = new ParticleSystem('particlesCanvas');
+      particleSystem.start();
+      
       const game = new Game2048();
     });
   </script>
