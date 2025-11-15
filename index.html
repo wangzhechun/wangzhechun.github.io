@@ -1,0 +1,1389 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>博远FJ 2048</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;700;900&family=ZCOOL+QingKe+HuangYou&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-color: #1E3A5F;
+      --text-color: #FFFFFF;
+      --highlight-color: #8B0000;
+      --tile-bg-color: #FFFFFF;
+      --tile-text-color: #1E3A5F;
+      --glass-opacity: 0.2;
+      --tile-border-radius: 8px;
+      --grid-border-width: 2px;
+      --inner-border-width: 1px;
+      --min-board-size: 300px;
+      --max-board-size: 90vw;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Noto Sans SC', sans-serif;
+      background: linear-gradient(135deg, #1E3A5F 0%, #0F2040 100%);
+      color: var(--text-color);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1200px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .header {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .title {
+      font-family: 'Noto Sans SC', sans-serif;
+      font-weight: 900;
+      font-size: clamp(2rem, 5vw, 3rem);
+      color: var(--text-color);
+    }
+
+    .stamp {
+      font-family: 'ZCOOL QingKe HuangYou', cursive;
+      font-size: clamp(1.5rem, 3vw, 2rem);
+      background-color: var(--highlight-color);
+      color: white;
+      padding: 5px 15px;
+      border-radius: 4px;
+    }
+
+    .game-container {
+      width: 100%;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: flex-start;
+      gap: 20px;
+    }
+
+    .board-container {
+      position: relative;
+      width: 100%;
+      max-width: 600px;
+    }
+
+    .board {
+      position: relative;
+      width: 100%;
+      padding-bottom: 100%;
+      background-color: var(--bg-color);
+      border: var(--grid-border-width) solid var(--text-color);
+      border-radius: var(--tile-border-radius);
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .grid {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      grid-template-rows: repeat(4, 1fr);
+      gap: 8px;
+      padding: 8px;
+    }
+
+    .cell {
+      background-color: rgba(255, 255, 255, 0.1);
+      border-radius: calc(var(--tile-border-radius) / 2);
+    }
+
+    .tile {
+      position: absolute;
+      width: calc(25% - 6px);
+      height: calc(25% - 6px);
+      border-radius: var(--tile-border-radius);
+      background-color: var(--tile-bg-color);
+      color: var(--tile-text-color);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-weight: bold;
+      font-size: clamp(0.8rem, 3vw, 1.2rem);
+      transition: all 0.15s ease;
+      z-index: 2;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .tile-new {
+      animation: appear 0.3s ease;
+    }
+
+    .tile-merged {
+      animation: merge 0.3s ease;
+      z-index: 3;
+    }
+
+    @keyframes appear {
+      from {
+        opacity: 0;
+        transform: scale(0);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    @keyframes merge {
+      0% {
+        transform: scale(1);
+      }
+      50% {
+        transform: scale(1.2);
+      }
+      100% {
+        transform: scale(1);
+      }
+    }
+
+    .score-container {
+      position: absolute;
+      bottom: 10px;
+      left: 10px;
+      font-size: clamp(0.8rem, 2vw, 1rem);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .best-container {
+      position: absolute;
+      bottom: 10px;
+      right: 10px;
+      font-size: clamp(0.8rem, 2vw, 1rem);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .score-value, .best-value {
+      color: var(--highlight-color);
+      font-weight: bold;
+      font-size: clamp(1rem, 3vw, 1.2rem);
+    }
+
+    .instructions {
+      background-color: rgba(30, 58, 95, var(--glass-opacity));
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: var(--tile-border-radius);
+      padding: 20px;
+      width: 100%;
+      max-width: 400px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .instructions h2 {
+      font-size: clamp(1.2rem, 3vw, 1.5rem);
+      margin-bottom: 15px;
+      text-align: center;
+    }
+
+    .level-list {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 5px;
+      margin-bottom: 15px;
+      font-size: clamp(0.8rem, 2vw, 0.9rem);
+    }
+
+    .special-rules {
+      margin-bottom: 15px;
+      font-size: clamp(0.8rem, 2vw, 0.9rem);
+    }
+
+    .special-rules h3 {
+      margin-bottom: 5px;
+      font-size: clamp(0.9rem, 2vw, 1rem);
+    }
+
+    .operation-tips {
+      margin-bottom: 15px;
+      font-size: clamp(0.8rem, 2vw, 0.9rem);
+    }
+
+    .victory-tips, .defeat-tips {
+      margin-bottom: 15px;
+      font-style: italic;
+      font-size: clamp(0.8rem, 2vw, 0.9rem);
+    }
+
+    .creator {
+      margin-top: 20px;
+      font-size: clamp(0.7rem, 1.5vw, 0.8rem);
+      text-align: center;
+      opacity: 0.8;
+    }
+
+    .buttons {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    button {
+      background-color: var(--highlight-color);
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 4px;
+      font-family: 'Noto Sans SC', sans-serif;
+      font-size: clamp(0.9rem, 2vw, 1rem);
+      cursor: pointer;
+      transition: background-color 0.2s ease, transform 0.1s ease;
+    }
+
+    button:hover {
+      background-color: #a52a2a;
+      transform: translateY(-2px);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 100;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    .modal.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-content {
+      background-color: var(--bg-color);
+      border: 2px solid var(--text-color);
+      border-radius: var(--tile-border-radius);
+      padding: 30px;
+      text-align: center;
+      max-width: 90%;
+      width: 400px;
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5);
+      transform: scale(0.9);
+      transition: transform 0.3s ease;
+    }
+
+    .modal.active .modal-content {
+      transform: scale(1);
+    }
+
+    .modal h2 {
+      font-size: clamp(1.5rem, 4vw, 2rem);
+      margin-bottom: 20px;
+    }
+
+    .modal p {
+      font-size: clamp(1rem, 3vw, 1.2rem);
+      margin-bottom: 25px;
+    }
+
+    .modal-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+    }
+
+    /* 响应式设计 */
+    @media (max-width: 768px) {
+      .game-container {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .instructions {
+        max-width: 100%;
+      }
+    }
+
+    /* 特殊块样式 */
+    .tile.special {
+      background-color: #f0e68c;
+      color: #8b4513;
+    }
+
+    .tile.special.liyuchu {
+      background-color: #f0e68c;
+      color: #8b4513;
+    }
+
+    .tile.special.mazhonghe {
+      background-color: #add8e6;
+      color: #00008b;
+    }
+
+    .tile.special.huyuxin {
+      background-color: #ffb6c1;
+      color: #8b008b;
+    }
+
+    /* 特殊效果 */
+    .confetti {
+      position: fixed;
+      width: 10px;
+      height: 10px;
+      background-color: #f00;
+      opacity: 0;
+      animation: confetti-fall 3s ease-in-out forwards;
+      z-index: 1000;
+    }
+
+    @keyframes confetti-fall {
+      0% {
+        transform: translateY(-100vh) rotate(0deg);
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(100vh) rotate(720deg);
+        opacity: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1 class="title">博远FJ 2048</h1>
+      <div class="stamp">淳</div>
+    </div>
+
+    <div class="game-container">
+      <div class="board-container">
+        <div class="board">
+          <div class="grid" id="game-grid">
+            <!-- 网格将通过JS动态生成 -->
+          </div>
+          <div class="score-container">
+            <span>当前分数</span>
+            <span class="score-value" id="score">0</span>
+          </div>
+          <div class="best-container">
+            <span>最高分数</span>
+            <span class="best-value" id="best-score">0</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="instructions">
+        <h2>玩法说明</h2>
+        
+        <div class="level-list">
+          <div>2: 汪蔡</div>
+          <div>4: 党哥</div>
+          <div>8: 凯皇</div>
+          <div>16: 百鸡</div>
+          <div>32: 钊君</div>
+          <div>64: 崇玉妹妹</div>
+          <div>128: 熊易燃</div>
+          <div>256: 心姐</div>
+          <div>512: 肥美</div>
+          <div>1024: 姜爷</div>
+          <div>2048: 韩总</div>
+          <div>4096: 张亦哲</div>
+          <div>8192: 王者淳</div>
+        </div>
+        
+        <div class="special-rules">
+          <h3>特殊合成块说明</h3>
+          <p>李雨初（×1）：与普通块合成时，普通块数值×1（即不变）</p>
+          <p>马中赫（×2）：与普通块合成时，普通块数值×2</p>
+          <p>胡语芯（×4）：与普通块合成时，普通块数值×4</p>
+          <p>注意：胡语芯之间不能合成</p>
+        </div>
+        
+        <div class="operation-tips">
+          <p>使用方向键或AWS D键移动滑块，合并相同人物，从汪蔡层层进阶！</p>
+        </div>
+        
+        <div class="victory-tips">
+          <p>已合成2048！可继续挑战8192。</p>
+        </div>
+        
+        <div class="defeat-tips">
+          <p>游戏结束，请重试！</p>
+        </div>
+        
+        <div class="creator">
+          <p>创作者：王者淳</p>
+          <p>吉祥物：wzc的小猫花花</p>
+        </div>
+        
+        <div class="buttons">
+          <button id="undo-btn">细品一下</button>
+          <button id="restart-btn">重游博远</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="victory-modal">
+    <div class="modal-content">
+      <h2>胜利！</h2>
+      <p>已合成韩总，继续挑战？</p>
+      <div class="modal-buttons">
+        <button id="continue-btn">继续挑战</button>
+        <button id="new-game-btn">新游戏</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="game-over-modal">
+    <div class="modal-content">
+      <h2>GAME OVER</h2>
+      <p>游戏结束，请重试！</p>
+      <div class="modal-buttons">
+        <button id="try-again-btn">再试一次</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 游戏配置
+    const config = {
+      size: 4,
+      startTiles: 2,
+      winValue: 2048,
+      characterMap: {
+        2: '汪蔡',
+        4: '党哥',
+        8: '凯皇',
+        16: '百鸡',
+        32: '钊君',
+        64: '崇玉妹妹',
+        128: '熊易燃',
+        256: '心姐',
+        512: '肥美',
+        1024: '姜爷',
+        2048: '韩总',
+        4096: '张亦哲',
+        8192: '王者淳'
+      },
+      specialBlocks: {
+        '李雨初': { multiplier: 1, type: 'liyuchu' },
+        '马中赫': { multiplier: 2, type: 'mazhonghe' },
+        '胡语芯': { multiplier: 4, type: 'huyuxin' }
+      },
+      specialBlockProbabilities: {
+        '李雨初': 0.1,
+        '马中赫': 0.05
+      }
+    };
+
+    // 游戏状态
+    let board = [];
+    let score = 0;
+    let bestScore = localStorage.getItem('bestScore') || 0;
+    let previousState = null;
+    let gameOver = false;
+    let won = false;
+    let canMove = true;
+
+    // DOM元素
+    const grid = document.getElementById('game-grid');
+    const scoreDisplay = document.getElementById('score');
+    const bestDisplay = document.getElementById('best-score');
+    const restartBtn = document.getElementById('restart-btn');
+    const undoBtn = document.getElementById('undo-btn');
+    const victoryModal = document.getElementById('victory-modal');
+    const gameOverModal = document.getElementById('game-over-modal');
+    const continueBtn = document.getElementById('continue-btn');
+    const newGameBtn = document.getElementById('new-game-btn');
+    const tryAgainBtn = document.getElementById('try-again-btn');
+
+    // 初始化游戏
+    function init() {
+      // 创建网格
+      grid.innerHTML = '';
+      for (let i = 0; i < config.size * config.size; i++) {
+        const cell = document.createElement('div');
+        cell.classList.add('cell');
+        grid.appendChild(cell);
+      }
+
+      // 初始化游戏状态
+      board = [];
+      for (let i = 0; i < config.size; i++) {
+        board[i] = [];
+        for (let j = 0; j < config.size; j++) {
+          board[i][j] = null;
+        }
+      }
+
+      score = 0;
+      updateScore();
+      bestDisplay.textContent = bestScore;
+
+      gameOver = false;
+      won = false;
+      canMove = true;
+
+      // 隐藏模态框
+      victoryModal.classList.remove('active');
+      gameOverModal.classList.remove('active');
+
+      // 添加初始棋子
+      for (let i = 0; i < config.startTiles; i++) {
+        addRandomTile();
+      }
+
+      // 保存初始状态用于悔棋
+      saveState();
+
+      // 渲染棋盘
+      renderBoard();
+    }
+
+    // 保存当前状态用于悔棋
+    function saveState() {
+      previousState = {
+        board: JSON.parse(JSON.stringify(board)),
+        score: score
+      };
+    }
+
+    // 悔棋
+    function undo() {
+      if (previousState && !gameOver) {
+        board = previousState.board;
+        score = previousState.score;
+        updateScore();
+        renderBoard();
+      }
+    }
+
+    // 添加随机棋子
+    function addRandomTile() {
+      const emptyCells = [];
+      for (let i = 0; i < config.size; i++) {
+        for (let j = 0; j < config.size; j++) {
+          if (!board[i][j]) {
+            emptyCells.push({ x: i, y: j });
+          }
+        }
+      }
+
+      if (emptyCells.length > 0) {
+        const randomCell = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+        
+        // 决定是添加普通块还是特殊块
+        const rand = Math.random();
+        let tile = null;
+        
+        if (rand < config.specialBlockProbabilities['李雨初']) {
+          tile = { type: 'special', name: '李雨初', ...config.specialBlocks['李雨初'] };
+        } else if (rand < config.specialBlockProbabilities['李雨初'] + config.specialBlockProbabilities['马中赫']) {
+          tile = { type: 'special', name: '马中赫', ...config.specialBlocks['马中赫'] };
+        } else {
+          // 添加普通块
+          const value = Math.random() < 0.9 ? 2 : 4;
+          tile = { type: 'normal', value: value, name: config.characterMap[value] };
+        }
+        
+        board[randomCell.x][randomCell.y] = tile;
+      }
+    }
+
+    // 渲染棋盘
+    function renderBoard() {
+      // 清除所有现有棋子
+      document.querySelectorAll('.tile').forEach(tile => tile.remove());
+
+      // 渲染新棋子
+      for (let i = 0; i < config.size; i++) {
+        for (let j = 0; j < config.size; j++) {
+          if (board[i][j]) {
+            const tile = document.createElement('div');
+            tile.classList.add('tile');
+            
+            // 添加特殊块样式
+            if (board[i][j].type === 'special') {
+              tile.classList.add('special');
+              tile.classList.add(board[i][j].type);
+            }
+            
+            tile.textContent = board[i][j].name;
+            const gap = 8; // 与.grid的gap一致
+            const tileSize = `calc(25% - ${gap * 3/4}px)`;
+            tile.style.width = tileSize;
+            tile.style.height = tileSize;
+            tile.style.top = `calc(${i * 25}% + ${i * gap}px + ${gap}px)`;
+            tile.style.left = `calc(${j * 25}% + ${j * gap}px + ${gap}px)`;
+            grid.appendChild(tile);
+          }
+        }
+      }
+    }
+
+    // 更新分数
+    function updateScore() {
+      scoreDisplay.textContent = score;
+      if (score > bestScore) {
+        bestScore = score;
+        bestDisplay.textContent = bestScore;
+        localStorage.setItem('bestScore', bestScore);
+      }
+    }
+
+    // 移动棋子
+    function move(direction) {
+      if (!canMove || gameOver) return false;
+
+      // 保存当前状态用于悔棋
+      saveState();
+
+      let moved = false;
+
+      // 根据方向调整移动逻辑
+      switch (direction) {
+        case 'up':
+          moved = moveUp();
+          break;
+        case 'right':
+          moved = moveRight();
+          break;
+        case 'down':
+          moved = moveDown();
+          break;
+        case 'left':
+          moved = moveLeft();
+          break;
+      }
+
+      // 如果有移动，添加新棋子并检查游戏状态
+      if (moved) {
+        addRandomTile();
+        renderBoard();
+        updateScore();
+        
+        // 检查胜利条件
+        if (!won) {
+          checkWin();
+        }
+        
+        // 检查游戏结束
+        setTimeout(() => {
+          if (!canMoveAny()) {
+            gameOver = true;
+            gameOverModal.classList.add('active');
+          }
+        }, 200);
+      } else {
+        // 如果没有移动，清除悔棋状态
+        previousState = null;
+      }
+
+      return moved;
+    }
+
+    // 向上移动
+    function moveUp() {
+      let moved = false;
+
+      // 首先移动所有块
+      for (let j = 0; j < config.size; j++) {
+        for (let i = 1; i < config.size; i++) {
+          if (board[i][j]) {
+            let row = i;
+            while (row > 0 && !board[row - 1][j]) {
+              board[row - 1][j] = board[row][j];
+              board[row][j] = null;
+              row--;
+              moved = true;
+            }
+          }
+        }
+      }
+
+      // 检查特殊块之间的合成
+      for (let j = 0; j < config.size; j++) {
+        for (let i = 0; i < config.size - 1; i++) {
+          if (board[i][j] && board[i+1][j] && 
+              board[i][j].type === 'special' && 
+              board[i+1][j].type === 'special' && 
+              board[i][j].name === board[i+1][j].name) {
+            
+            // 特殊块合成
+            if (board[i][j].name === '李雨初') {
+              board[i][j] = { type: 'special', name: '马中赫', ...config.specialBlocks['马中赫'] };
+            } else if (board[i][j].name === '马中赫') {
+              board[i][j] = { type: 'special', name: '胡语芯', ...config.specialBlocks['胡语芯'] };
+            }
+            board[i+1][j] = null;
+            moved = true;
+          }
+        }
+      }
+
+      // 再次移动所有块以填补空白
+      for (let j = 0; j < config.size; j++) {
+        for (let i = 1; i < config.size; i++) {
+          if (board[i][j]) {
+            let row = i;
+            while (row > 0 && !board[row - 1][j]) {
+              board[row - 1][j] = board[row][j];
+              board[row][j] = null;
+              row--;
+              moved = true;
+            }
+          }
+        }
+      }
+
+      // 处理特殊块与普通块的合成
+      for (let j = 0; j < config.size; j++) {
+        for (let i = 0; i < config.size - 1; i++) {
+          if (board[i][j] && board[i][j].type === 'special' && 
+              board[i+1][j] && board[i+1][j].type === 'normal') {
+            
+            // 特殊块与普通块合成
+            const newValue = board[i+1][j].value * board[i][j].multiplier;
+            board[i+1][j] = { 
+              type: 'normal', 
+              value: newValue, 
+              name: config.characterMap[Math.min(newValue, 8192)] 
+            };
+            board[i][j] = null;
+            score += newValue;
+            moved = true;
+            
+            // 合成后再次移动填补空白
+            for (let k = i; k > 0; k--) {
+              if (board[k][j] && !board[k-1][j]) {
+                board[k-1][j] = board[k][j];
+                board[k][j] = null;
+              }
+            }
+          }
+        }
+      }
+
+      // 合并普通块
+      for (let j = 0; j < config.size; j++) {
+        for (let i = 0; i < config.size - 1; i++) {
+          if (board[i][j] && board[i+1][j] && 
+              board[i][j].type === 'normal' && 
+              board[i+1][j].type === 'normal' && 
+              board[i][j].value === board[i+1][j].value) {
+            
+            const newValue = board[i][j].value * 2;
+            board[i][j] = { 
+              type: 'normal', 
+              value: newValue, 
+              name: config.characterMap[Math.min(newValue, 8192)] 
+            };
+            board[i+1][j] = null;
+            score += newValue;
+            moved = true;
+          }
+        }
+      }
+
+      // 最后再次移动所有块以填补空白
+      for (let j = 0; j < config.size; j++) {
+        for (let i = 1; i < config.size; i++) {
+          if (board[i][j]) {
+            let row = i;
+            while (row > 0 && !board[row - 1][j]) {
+              board[row - 1][j] = board[row][j];
+              board[row][j] = null;
+              row--;
+              moved = true;
+            }
+          }
+        }
+      }
+
+      return moved;
+    }
+
+    // 向右移动
+    function moveRight() {
+      let moved = false;
+
+      // 首先移动所有块
+      for (let i = 0; i < config.size; i++) {
+        for (let j = config.size - 2; j >= 0; j--) {
+          if (board[i][j]) {
+            let col = j;
+            while (col < config.size - 1 && !board[i][col + 1]) {
+              board[i][col + 1] = board[i][col];
+              board[i][col] = null;
+              col++;
+              moved = true;
+            }
+          }
+        }
+      }
+
+      // 检查特殊块之间的合成
+      for (let i = 0; i < config.size; i++) {
+        for (let j = config.size - 1; j > 0; j--) {
+          if (board[i][j] && board[i][j-1] && 
+              board[i][j].type === 'special' && 
+              board[i][j-1].type === 'special' && 
+              board[i][j].name === board[i][j-1].name) {
+            
+            // 特殊块合成
+            if (board[i][j].name === '李雨初') {
+              board[i][j] = { type: 'special', name: '马中赫', ...config.specialBlocks['马中赫'] };
+            } else if (board[i][j].name === '马中赫') {
+              board[i][j] = { type: 'special', name: '胡语芯', ...config.specialBlocks['胡语芯'] };
+            }
+            board[i][j-1] = null;
+            moved = true;
+          }
+        }
+      }
+
+      // 再次移动所有块以填补空白
+      for (let i = 0; i < config.size; i++) {
+        for (let j = config.size - 2; j >= 0; j--) {
+          if (board[i][j]) {
+            let col = j;
+            while (col < config.size - 1 && !board[i][col + 1]) {
+              board[i][col + 1] = board[i][col];
+              board[i][col] = null;
+              col++;
+              moved = true;
+            }
+          }
+        }
+      }
+
+      // 处理特殊块与普通块的合成
+      for (let i = 0; i < config.size; i++) {
+        for (let j = config.size - 1; j > 0; j--) {
+          if (board[i][j] && board[i][j].type === 'special' && 
+              board[i][j-1] && board[i][j-1].type === 'normal') {
+            
+            // 特殊块与普通块合成
+            const newValue = board[i][j-1].value * board[i][j].multiplier;
+            board[i][j-1] = { 
+              type: 'normal', 
+              value: newValue, 
+              name: config.characterMap[Math.min(newValue, 8192)] 
+            };
+            board[i][j] = null;
+            score += newValue;
+            moved = true;
+            
+            // 合成后再次移动填补空白
+            for (let k = j; k < config.size - 1; k++) {
+              if (board[i][k] && !board[i][k+1]) {
+                board[i][k+1] = board[i][k];
+                board[i][k] = null;
+              }
+            }
+          }
+        }
+      }
+
+      // 合并普通块
+      for (let i = 0; i < config.size; i++) {
+        for (let j = config.size - 1; j > 0; j--) {
+          if (board[i][j] && board[i][j-1] && 
+              board[i][j].type === 'normal' && 
+              board[i][j-1].type === 'normal' && 
+              board[i][j].value === board[i][j-1].value) {
+            
+            const newValue = board[i][j].value * 2;
+            board[i][j] = { 
+              type: 'normal', 
+              value: newValue, 
+              name: config.characterMap[Math.min(newValue, 8192)] 
+            };
+            board[i][j-1] = null;
+            score += newValue;
+            moved = true;
+          }
+        }
+      }
+
+      // 最后再次移动所有块以填补空白
+      for (let i = 0; i < config.size; i++) {
+        for (let j = config.size - 2; j >= 0; j--) {
+          if (board[i][j]) {
+            let col = j;
+            while (col < config.size - 1 && !board[i][col + 1]) {
+              board[i][col + 1] = board[i][col];
+              board[i][col] = null;
+              col++;
+              moved = true;
+            }
+          }
+        }
+      }
+
+      return moved;
+    }
+
+    // 向下移动
+    function moveDown() {
+      let moved = false;
+
+      // 首先移动所有块
+      for (let j = 0; j < config.size; j++) {
+        for (let i = config.size - 2; i >= 0; i--) {
+          if (board[i][j]) {
+            let row = i;
+            while (row < config.size - 1 && !board[row + 1][j]) {
+              board[row + 1][j] = board[row][j];
+              board[row][j] = null;
+              row++;
+              moved = true;
+            }
+          }
+        }
+      }
+
+      // 检查特殊块之间的合成
+      for (let j = 0; j < config.size; j++) {
+        for (let i = config.size - 1; i > 0; i--) {
+          if (board[i][j] && board[i-1][j] && 
+              board[i][j].type === 'special' && 
+              board[i-1][j].type === 'special' && 
+              board[i][j].name === board[i-1][j].name) {
+            
+            // 特殊块合成
+            if (board[i][j].name === '李雨初') {
+              board[i][j] = { type: 'special', name: '马中赫', ...config.specialBlocks['马中赫'] };
+            } else if (board[i][j].name === '马中赫') {
+              board[i][j] = { type: 'special', name: '胡语芯', ...config.specialBlocks['胡语芯'] };
+            }
+            board[i-1][j] = null;
+            moved = true;
+          }
+        }
+      }
+
+      // 再次移动所有块以填补空白
+      for (let j = 0; j < config.size; j++) {
+        for (let i = config.size - 2; i >= 0; i--) {
+          if (board[i][j]) {
+            let row = i;
+            while (row < config.size - 1 && !board[row + 1][j]) {
+              board[row + 1][j] = board[row][j];
+              board[row][j] = null;
+              row++;
+              moved = true;
+            }
+          }
+        }
+      }
+
+      // 处理特殊块与普通块的合成
+      for (let j = 0; j < config.size; j++) {
+        for (let i = config.size - 1; i > 0; i--) {
+          if (board[i][j] && board[i][j].type === 'special' && 
+              board[i-1][j] && board[i-1][j].type === 'normal') {
+            
+            // 特殊块与普通块合成
+            const newValue = board[i-1][j].value * board[i][j].multiplier;
+            board[i-1][j] = { 
+              type: 'normal', 
+              value: newValue, 
+              name: config.characterMap[Math.min(newValue, 8192)] 
+            };
+            board[i][j] = null;
+            score += newValue;
+            moved = true;
+            
+            // 合成后再次移动填补空白
+            for (let k = i; k < config.size - 1; k++) {
+              if (board[k][j] && !board[k+1][j]) {
+                board[k+1][j] = board[k][j];
+                board[k][j] = null;
+              }
+            }
+          }
+        }
+      }
+
+      // 合并普通块
+      for (let j = 0; j < config.size; j++) {
+        for (let i = config.size - 1; i > 0; i--) {
+          if (board[i][j] && board[i-1][j] && 
+              board[i][j].type === 'normal' && 
+              board[i-1][j].type === 'normal' && 
+              board[i][j].value === board[i-1][j].value) {
+            
+            const newValue = board[i][j].value * 2;
+            board[i][j] = { 
+              type: 'normal', 
+              value: newValue, 
+              name: config.characterMap[Math.min(newValue, 8192)] 
+            };
+            board[i-1][j] = null;
+            score += newValue;
+            moved = true;
+          }
+        }
+      }
+
+      // 最后再次移动所有块以填补空白
+      for (let j = 0; j < config.size; j++) {
+        for (let i = config.size - 2; i >= 0; i--) {
+          if (board[i][j]) {
+            let row = i;
+            while (row < config.size - 1 && !board[row + 1][j]) {
+              board[row + 1][j] = board[row][j];
+              board[row][j] = null;
+              row++;
+              moved = true;
+            }
+          }
+        }
+      }
+
+      return moved;
+    }
+
+    // 向左移动
+    function moveLeft() {
+      let moved = false;
+
+      // 首先移动所有块
+      for (let i = 0; i < config.size; i++) {
+        for (let j = 1; j < config.size; j++) {
+          if (board[i][j]) {
+            let col = j;
+            while (col > 0 && !board[i][col - 1]) {
+              board[i][col - 1] = board[i][col];
+              board[i][col] = null;
+              col--;
+              moved = true;
+            }
+          }
+        }
+      }
+
+      // 检查特殊块之间的合成
+      for (let i = 0; i < config.size; i++) {
+        for (let j = 0; j < config.size - 1; j++) {
+          if (board[i][j] && board[i][j+1] && 
+              board[i][j].type === 'special' && 
+              board[i][j+1].type === 'special' && 
+              board[i][j].name === board[i][j+1].name) {
+            
+            // 特殊块合成
+            if (board[i][j].name === '李雨初') {
+              board[i][j] = { type: 'special', name: '马中赫', ...config.specialBlocks['马中赫'] };
+            } else if (board[i][j].name === '马中赫') {
+              board[i][j] = { type: 'special', name: '胡语芯', ...config.specialBlocks['胡语芯'] };
+            }
+            board[i][j+1] = null;
+            moved = true;
+          }
+        }
+      }
+
+      // 再次移动所有块以填补空白
+      for (let i = 0; i < config.size; i++) {
+        for (let j = 1; j < config.size; j++) {
+          if (board[i][j]) {
+            let col = j;
+            while (col > 0 && !board[i][col - 1]) {
+              board[i][col - 1] = board[i][col];
+              board[i][col] = null;
+              col--;
+              moved = true;
+            }
+          }
+        }
+      }
+
+      // 处理特殊块与普通块的合成
+      for (let i = 0; i < config.size; i++) {
+        for (let j = 0; j < config.size - 1; j++) {
+          if (board[i][j] && board[i][j].type === 'special' && 
+              board[i][j+1] && board[i][j+1].type === 'normal') {
+            
+            // 特殊块与普通块合成
+            const newValue = board[i][j+1].value * board[i][j].multiplier;
+            board[i][j+1] = { 
+              type: 'normal', 
+              value: newValue, 
+              name: config.characterMap[Math.min(newValue, 8192)] 
+            };
+            board[i][j] = null;
+            score += newValue;
+            moved = true;
+            
+            // 合成后再次移动填补空白
+            for (let k = j; k > 0; k--) {
+              if (board[i][k] && !board[i][k-1]) {
+                board[i][k-1] = board[i][k];
+                board[i][k] = null;
+              }
+            }
+          }
+        }
+      }
+
+      // 合并普通块
+      for (let i = 0; i < config.size; i++) {
+        for (let j = 0; j < config.size - 1; j++) {
+          if (board[i][j] && board[i][j+1] && 
+              board[i][j].type === 'normal' && 
+              board[i][j+1].type === 'normal' && 
+              board[i][j].value === board[i][j+1].value) {
+            
+            const newValue = board[i][j].value * 2;
+            board[i][j] = { 
+              type: 'normal', 
+              value: newValue, 
+              name: config.characterMap[Math.min(newValue, 8192)] 
+            };
+            board[i][j+1] = null;
+            score += newValue;
+            moved = true;
+          }
+        }
+      }
+
+      // 最后再次移动所有块以填补空白
+      for (let i = 0; i < config.size; i++) {
+        for (let j = 1; j < config.size; j++) {
+          if (board[i][j]) {
+            let col = j;
+            while (col > 0 && !board[i][col - 1]) {
+              board[i][col - 1] = board[i][col];
+              board[i][col] = null;
+              col--;
+              moved = true;
+            }
+          }
+        }
+      }
+
+      return moved;
+    }
+
+    // 检查是否可以移动
+    function canMoveAny() {
+      // 检查是否有空位
+      for (let i = 0; i < config.size; i++) {
+        for (let j = 0; j < config.size; j++) {
+          if (!board[i][j]) {
+            return true;
+          }
+        }
+      }
+
+      // 检查是否有可以合并的普通块
+      for (let i = 0; i < config.size; i++) {
+        for (let j = 0; j < config.size; j++) {
+          const cell = board[i][j];
+          if (cell && cell.type === 'normal') {
+            // 检查右侧
+            if (j < config.size - 1 && 
+                board[i][j+1] && 
+                board[i][j+1].type === 'normal' && 
+                board[i][j+1].value === cell.value) {
+              return true;
+            }
+            
+            // 检查下方
+            if (i < config.size - 1 && 
+                board[i+1][j] && 
+                board[i+1][j].type === 'normal' && 
+                board[i+1][j].value === cell.value) {
+              return true;
+            }
+          }
+        }
+      }
+
+      // 检查是否有可以合成的特殊块
+      for (let i = 0; i < config.size; i++) {
+        for (let j = 0; j < config.size; j++) {
+          const cell = board[i][j];
+          if (cell && cell.type === 'special') {
+            // 检查右侧
+            if (j < config.size - 1 && 
+                board[i][j+1] && 
+                board[i][j+1].type === 'special' && 
+                board[i][j+1].name === cell.name) {
+              return true;
+            }
+            
+            // 检查下方
+            if (i < config.size - 1 && 
+                board[i+1][j] && 
+                board[i+1][j].type === 'special' && 
+                board[i+1][j].name === cell.name) {
+              return true;
+            }
+          }
+        }
+      }
+
+      return false;
+    }
+
+    // 检查胜利条件
+    function checkWin() {
+      for (let i = 0; i < config.size; i++) {
+        for (let j = 0; j < config.size; j++) {
+          if (board[i][j] && 
+              board[i][j].type === 'normal' && 
+              board[i][j].value >= config.winValue) {
+            won = true;
+            victoryModal.classList.add('active');
+            createConfetti();
+            return;
+          }
+        }
+      }
+    }
+
+    // 创建庆祝效果
+    function createConfetti() {
+      const colors = ['#f00', '#0f0', '#00f', '#ff0', '#f0f', '#0ff'];
+      for (let i = 0; i < 100; i++) {
+        const confetti = document.createElement('div');
+        confetti.classList.add('confetti');
+        confetti.style.left = `${Math.random() * 100}vw`;
+        confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+        confetti.style.animationDelay = `${Math.random() * 3}s`;
+        document.body.appendChild(confetti);
+        
+        // 动画结束后移除元素
+        setTimeout(() => {
+          confetti.remove();
+        }, 3000);
+      }
+    }
+
+    // 键盘控制
+    document.addEventListener('keydown', (e) => {
+      if (gameOver) return;
+
+      switch (e.key) {
+        case 'ArrowUp':
+        case 'w':
+        case 'W':
+          move('up');
+          e.preventDefault();
+          break;
+        case 'ArrowRight':
+        case 'd':
+        case 'D':
+          move('right');
+          e.preventDefault();
+          break;
+        case 'ArrowDown':
+        case 's':
+        case 'S':
+          move('down');
+          e.preventDefault();
+          break;
+        case 'ArrowLeft':
+        case 'a':
+        case 'A':
+          move('left');
+          e.preventDefault();
+          break;
+      }
+    });
+
+    // 触摸控制
+    let touchStartX, touchStartY;
+    const minSwipeDistance = 50;
+
+    document.addEventListener('touchstart', (e) => {
+      if (gameOver) return;
+
+      touchStartX = e.touches[0].clientX;
+      touchStartY = e.touches[0].clientY;
+      e.preventDefault();
+    }, { passive: false });
+
+    document.addEventListener('touchmove', (e) => {
+      e.preventDefault();
+    }, { passive: false });
+
+    document.addEventListener('touchend', (e) => {
+      if (gameOver) return;
+
+      const touchEndX = e.changedTouches[0].clientX;
+      const touchEndY = e.changedTouches[0].clientY;
+
+      const dx = touchEndX - touchStartX;
+      const dy = touchEndY - touchStartY;
+
+      // 确定滑动方向
+      if (Math.abs(dx) > Math.abs(dy)) {
+        // 水平滑动
+        if (Math.abs(dx) > minSwipeDistance) {
+          if (dx > 0) {
+            move('right');
+          } else {
+            move('left');
+          }
+        }
+      } else {
+        // 垂直滑动
+        if (Math.abs(dy) > minSwipeDistance) {
+          if (dy > 0) {
+            move('down');
+          } else {
+            move('up');
+          }
+        }
+      }
+
+      e.preventDefault();
+    }, { passive: false });
+
+    // 按钮事件
+    restartBtn.addEventListener('click', init);
+    undoBtn.addEventListener('click', undo);
+    continueBtn.addEventListener('click', () => {
+      victoryModal.classList.remove('active');
+    });
+    newGameBtn.addEventListener('click', init);
+    tryAgainBtn.addEventListener('click', init);
+
+    // 初始化游戏
+    init();
+  </script>
+</body>
+</html>
