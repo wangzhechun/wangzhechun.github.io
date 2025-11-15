@@ -412,6 +412,9 @@
         // 创建空棋盘数据
         this.board = Array(this.size).fill().map(() => Array(this.size).fill(0));
 
+        // 重置分数
+        this.score = 0;
+        
         // 更新分数显示
         this.scoreDisplay.textContent = this.score;
         this.bestScoreDisplay.textContent = this.bestScore;
@@ -925,6 +928,11 @@
 
         // 没有空格子且没有可合并的棋子，游戏结束
         this.over = true;
+        
+        // 关键修复：游戏结束时清空当前得分
+        this.score = 0;
+        this.scoreDisplay.textContent = this.score;
+        
         this.messageText.textContent = 'GAME OVER!';
         this.quoteText.textContent = '';
         this.gameMessage.classList.add('game-over');
