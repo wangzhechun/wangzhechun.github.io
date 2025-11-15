@@ -199,104 +199,11 @@
   </style>
 </head>
 <body class="bg-gray-100 min-h-screen font-inter">
-<!-- 粒子背景 -->
-<canvas id="particlesCanvas" class="fixed top-0 left-0 w-full h-full z-0"></canvas>
-
-<div class="relative w-full min-h-screen overflow-hidden" style="min-height: 100vh; display: flex; flex-direction: column; background-color: #0F172A; background-image: radial-gradient(circle at 25% 25%, rgba(59, 130, 246, 0.1) 0%, transparent 50%), radial-gradient(circle at 75% 75%, rgba(139, 92, 246, 0.1) 0%, transparent 50%);">
-
-    <!-- 主容器 -->
-    <div class="relative z-10 container mx-auto px-4 py-8 md:py-12 max-w-6xl flex-grow flex flex-col">
-      <!-- 标题区 -->
-      <header class="mb-8 text-center">
-        <div class="flex justify-center items-center relative">
-          <h1 class="text-3xl md:text-4xl font-inter text-primary">博远FJ 2048</h1>
-          <div class="absolute right-0 md:right-auto md:left-full md:ml-4 top-0 transform md:translate-x-0 translate-x-16 -translate-y-4 bg-white px-2 py-1 rounded">
-            <span class="text-lg font-inter text-red-800">者淳</span>
-          </div>
-        </div>
-        <p class="mt-4 text-lg text-gray-700 max-w-2xl mx-auto font-inter">从汪蔡开始，层层递进，合成韩总及以上！</p>
-      </header>
-
-      <!-- 主要内容区 -->
-      <div class="flex flex-col md:flex-row justify-center items-start gap-8 mt-8">
-        <!-- 游戏棋盘区 -->
-        <div class="relative">
-          <div class="game-container bg-black bg-opacity-80 rounded-lg p-4 shadow-lg border-2 border-black" style="box-shadow: 0 10px 25px rgba(0,0,0,0.5), 0 6px 12px rgba(0,0,0,0.3), inset 0 1px 3px rgba(255,255,255,0.1);">
-            <div class="grid grid-cols-4 gap-3 bg-black bg-opacity-50 rounded-md p-3" id="game-board" style="max-width: 500px; width: 100%; aspect-ratio: 1/1; margin: 0 auto;">
-              <!-- 棋盘格子将通过JS动态生成 -->
-            </div>
-
-            <!-- 分数区域 -->
-            <div class="flex justify-between mt-4 text-white">
-              <div class="score-container bg-black bg-opacity-60 rounded-md px-4 py-2 flex items-center">
-                <span class="mr-2">当前分数:</span>
-                <span id="score" class="font-bold">0</span>
-              </div>
-              <div class="score-container bg-black bg-opacity-60 rounded-md px-4 py-2 flex items-center">
-                <span class="mr-2">最高分:</span>
-                <span id="best-score" class="font-bold">0</span>
-              </div>
-            </div>
-
-            <!-- 操作按钮 -->
-            <div class="flex justify-center gap-4 mt-4">
-              <button id="new-game" class="btn-2048 bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-700 hover:to-blue-900">
-                开始新游戏
-              </button>
-              <button id="undo" class="btn-2048 bg-gradient-to-r from-purple-600 to-purple-800 hover:from-purple-700 hover:to-purple-900">
-                细品一下
-              </button>
-            </div>
-            
-            <!-- 创作者信息 -->
-            <div class="text-center mt-4 text-xs text-black">
-              <p>创作者：王者淳</p>
-              <p>吉祥物：王者淳的小猫花花</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- 游戏规则和说明 -->
-        <div class="md:w-72 lg:w-80">
-          <div class="rules-list bg-white bg-opacity-90 rounded-lg p-4 shadow-lg">
-            <h2 class="text-xl font-bold mb-4">游戏规则</h2>
-            <ul class="space-y-2">
-              <li class="rule-item">
-                <i class="fa fa-arrow-up text-primary"></i>
-                <span>使用 <strong>↑↓←→</strong> 或 <strong>WASD</strong> 键移动方块</span>
-              </li>
-              <li class="rule-item">
-                <i class="fa fa-plus text-primary"></i>
-                <span>相同数字的方块相撞时会 <strong>合并</strong> 成为它们的和</span>
-              </li>
-              <li class="rule-item">
-                <i class="fa fa-star text-primary"></i>
-                <span>每次移动后会随机生成一个 <strong>2</strong> 或 <strong>4</strong></span>
-              </li>
-              <li class="rule-item">
-                <i class="fa fa-trophy text-primary"></i>
-                <span>目标是合成 <strong>王者淳</strong> (65536)</span>
-              </li>
-              <li class="rule-item">
-                <i class="fa fa-undo text-primary"></i>
-                <span>点击"细品一下"可以悔棋一步</span>
-              </li>
-            </ul>
-          </div>
-
-          <!-- 等级说明 -->
-          <div class="rules-list bg-white bg-opacity-90 rounded-lg p-4 shadow-lg mt-4">
-            <h2 class="text-xl font-bold mb-4">等级说明</h2>
-            <div class="overflow-y-auto max-h-60">
-              <div class="grid grid-cols-2 gap-2" id="level-guide">
-                <!-- 等级说明将通过JS动态生成 -->
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+<div class="relative w-full min-h-screen overflow-hidden" style="min-height: 100vh; display: flex; flex-direction: column;">
+    <!-- 背景图 -->
+    <div class="absolute inset-0 z-0">
+      <img src="https://p3-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/rc/pc/super_tool/4dca70059ce044bfbbfe7294d42d7211~tplv-a9rns2rl98-image.image?rcl=202510231052564D481AD8A531CFEB2552&rk3s=8e244e95&rrcfp=f06b921b&x-expires=1763780135&x-signature=sNnOoVVmzXx%2BzEC4MTc3rBnxWMQ%3D" alt="水墨山水背景" class="w-full h-full object-cover opacity-50" style="border: none;">
     </div>
-  </div>
 
     <!-- 主容器 -->
     <div class="relative z-10 container mx-auto px-4 py-8 md:py-12 max-w-6xl flex-grow flex flex-col">
@@ -1127,10 +1034,6 @@
 
     // 初始化游戏
     document.addEventListener('DOMContentLoaded', () => {
-      // 初始化粒子系统
-      const particleSystem = new ParticleSystem('particlesCanvas');
-      particleSystem.start();
-      
       const game = new Game2048();
     });
   </script>
