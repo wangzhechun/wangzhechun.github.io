@@ -1,4 +1,6 @@
-<html lang="zh-CN"><head>
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>博远FJ 2048</title>
@@ -8,9 +10,12 @@
   <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
   <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Ma+Shan+Zheng&display=swap" rel="stylesheet">
+  <!-- html2canvas CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 
   <script>
     tailwind.config = {
+      darkMode: 'class',
       theme: {
         extend: {
           colors: {
@@ -48,6 +53,12 @@
         backdrop-filter: blur(4px);
         -webkit-backdrop-filter: blur(4px);
         border: 1px solid rgba(255, 255, 255, 0.18);
+      }
+      .glass-effect-dark {
+        background: rgba(0, 0, 0, 0.25);
+        backdrop-filter: blur(4px);
+        -webkit-backdrop-filter: blur(4px);
+        border: 1px solid rgba(0, 0, 0, 0.18);
       }
       .tile-inner {
         display: flex;
@@ -197,14 +208,72 @@
         color: #333;
         margin-top: 0.25rem;
       }
+      .dark .rule-item i {
+        color: #ddd;
+      }
+      .watermark {
+        position: absolute;
+        bottom: 10px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 12px;
+        color: rgba(0, 0, 0, 0.6);
+        z-index: 20;
+        font-family: 'Inter', sans-serif;
+        white-space: nowrap;
+      }
+      .dark .watermark {
+        color: rgba(255, 255, 255, 0.6);
+      }
+      .theme-toggle {
+        position: absolute;
+        right: 0;
+        top: 0;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        background: rgba(255, 255, 255, 0.7);
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      }
+      .dark .theme-toggle {
+        background: rgba(0, 0, 0, 0.7);
+        color: white;
+      }
+      .theme-toggle:hover {
+        transform: scale(1.1);
+      }
+      .screenshot-notification {
+        position: fixed;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(0, 0, 0, 0.8);
+        color: white;
+        padding: 10px 20px;
+        border-radius: 5px;
+        z-index: 1000;
+        font-family: 'Inter', sans-serif;
+        animation: fadeInOut 2s ease-in-out;
+      }
+      @keyframes fadeInOut {
+        0% { opacity: 0; }
+        20% { opacity: 1; }
+        80% { opacity: 1; }
+        100% { opacity: 0; }
+      }
     }
   </style>
 </head>
-<body class="bg-gray-100 min-h-screen font-inter">
+<body class="bg-gray-100 min-h-screen font-inter dark:bg-gray-900 transition-colors duration-300">
 <div class="relative w-full min-h-screen overflow-hidden" style="min-height: 100vh; display: flex; flex-direction: column;">
     <!-- 背景图 -->
     <div class="absolute inset-0 z-0">
-      <img src="https://gp3e.saobby.com/i/dXa2Ue7Op0oTdL1s.jpg" alt="背景" class="w-full h-full object-cover opacity-50" style="border: none;">
+      <img src="https://gp3e.saobby.com/i/dXa2Ue7Op0oTdL1s.jpg" alt="背景" class="w-full h-full object-cover opacity-50 dark:opacity-30" style="border: none;">
     </div>
 
     <!-- 主容器 -->
@@ -212,30 +281,36 @@
       <!-- 标题区 -->
       <header class="mb-8 text-center">
         <div class="flex justify-center items-center relative">
-          <h1 class="text-3xl md:text-4xl font-inter text-primary">博远FJ 2048</h1>
-          <div class="absolute right-0 md:right-auto md:left-full md:ml-4 top-0 transform md:translate-x-0 translate-x-16 -translate-y-4 glass-effect px-2 py-1 rounded">
-            <span class="text-lg font-['Ma_Shan_Zheng'] text-red-800">者淳</span>
+          <div class="absolute left-0 md:left-auto md:right-full md:mr-4 top-0 transform md:translate-x-0 -translate-x-16 -translate-y-4 glass-effect dark:glass-effect-dark px-2 py-1 rounded">
+            <span class="text-lg font-['Ma_Shan_Zheng'] text-red-800 dark:text-red-400">者淳</span>
+          </div>
+          <h1 class="text-3xl md:text-4xl font-inter text-primary dark:text-white">博远FJ 2048</h1>
+          <div class="theme-toggle" id="theme-toggle">
+            <i class="fa fa-moon-o" id="theme-icon"></i>
           </div>
         </div>
-        <p class="mt-4 text-lg text-gray-700 max-w-2xl mx-auto font-inter">从汪蔡开始，层层递进，合成韩总及以上！</p>
+        <p class="mt-4 text-lg text-gray-700 dark:text-gray-300 max-w-2xl mx-auto font-inter">从汪蔡开始，层层递进，合成韩总及以上！</p>
       </header>
 
       <!-- 主要内容区 -->
       <div class="flex flex-col md:flex-row justify-center items-start gap-8 mt-8">
         <!-- 游戏棋盘区 -->
         <div class="relative">
-          <div class="game-container glass-effect rounded-lg p-8 shadow-lg border-2 border-gray-200" style="box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.1);">
-            <div class="grid grid-cols-4 gap-8 bg-white bg-opacity-70 rounded-md p-8" id="game-board" style="max-width: 700px; width: 100%; aspect-ratio: 1/1; margin: 0 auto;">
+          <div class="game-container glass-effect dark:glass-effect-dark rounded-lg p-8 shadow-lg border-2 border-gray-200 dark:border-gray-700 relative" style="box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.1);">
+            <!-- 水印 -->
+            <div class="watermark" id="watermark"></div>
+            
+            <div class="grid grid-cols-4 gap-8 bg-white dark:bg-gray-800 bg-opacity-70 dark:bg-opacity-70 rounded-md p-8" id="game-board" style="max-width: 700px; width: 100%; aspect-ratio: 1/1; margin: 0 auto;">
               <!-- 棋盘格子将通过JS动态生成 -->
             </div>
 
             <!-- 分数区域 -->
-            <div class="flex justify-between mt-3 text-black">
-              <div class="flex flex-col items-center bg-white bg-opacity-70 rounded-md px-4 py-2">
+            <div class="flex justify-between mt-3 text-black dark:text-white">
+              <div class="flex flex-col items-center bg-white dark:bg-gray-800 bg-opacity-70 dark:bg-opacity-70 rounded-md px-4 py-2">
                 <span class="text-sm opacity-75 font-inter" style="font-weight: bold; font-size: 16px;">当前得分</span>
                 <span class="text-xl font-bold font-inter" id="score">0</span>
               </div>
-              <div class="flex flex-col items-center bg-white bg-opacity-70 rounded-md px-4 py-2">
+              <div class="flex flex-col items-center bg-white dark:bg-gray-800 bg-opacity-70 dark:bg-opacity-70 rounded-md px-4 py-2">
                 <span class="text-sm opacity-75 font-inter" style="font-weight: bold; font-size: 16px;">最高得分</span>
                 <span class="text-xl font-bold font-inter" id="best-score">0</span>
               </div>
@@ -244,44 +319,44 @@
 
           <!-- 游戏结束/胜利消息 -->
           <div class="game-message" id="game-message">
-            <div class="victory-card bg-white bg-opacity-90 p-8 rounded-lg shadow-xl max-w-md">
+            <div class="victory-card bg-white dark:bg-gray-800 bg-opacity-90 dark:bg-opacity-90 p-8 rounded-lg shadow-xl max-w-md">
               <div class="message" id="message-text">游戏胜利!</div>
               <div class="quote" id="quote-text">你获得了胜利！</div>
               <div class="flex gap-4 justify-center">
-                <button id="try-again-btn" class="bg-primary text-white hover:bg-opacity-80">再试一次</button>
-                <button id="continue-btn" class="bg-gray-200 hover:bg-gray-300 hidden">继续尝试</button>
+                <button id="try-again-btn" class="bg-primary dark:bg-gray-700 text-white hover:bg-opacity-80">再试一次</button>
+                <button id="save-screenshot-btn" class="bg-blue-500 text-white hover:bg-blue-600">保存终局图片</button>
               </div>
             </div>
           </div>
         </div>
 
         <!-- 右侧游戏规则介绍 -->
-        <div class="w-full md:w-64 glass-effect rounded-lg p-6" style="min-height: 530px; align-self: flex-start; box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.1);">
-          <h2 class="text-2xl font-inter text-center mb-4 inline-block relative" style="font-size: 20px; color: #000;">游戏规则</h2>
+        <div class="w-full md:w-64 glass-effect dark:glass-effect-dark rounded-lg p-6 relative" style="min-height: 530px; align-self: flex-start; box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.1);">
+          <h2 class="text-2xl font-inter text-center mb-4 inline-block relative dark:text-white" style="font-size: 20px;">游戏规则</h2>
           
           <div class="space-y-4 mt-6">
             <div class="rule-item">
-              <i class="fa fa-undo text-primary"></i>
-              <p class="font-inter">点击"细品一下"按钮可以悔棋一次，帮助你纠正错误的移动</p>
+              <i class="fa fa-undo text-primary dark:text-gray-300"></i>
+              <p class="font-inter dark:text-gray-300">点击"细品一下"按钮可以悔棋一次，帮助你纠正错误的移动</p>
             </div>
             
             <div class="rule-item">
-              <i class="fa fa-users text-primary"></i>
-              <p class="font-inter">人物等级：汪蔡(2) → 党哥(4) → 凯皇(8) → 百鸡(16) → 钊君(32) → 崇玉妹妹(64) → 熊易燃(128) → 小猪初初(256) → 马赫(512) → 胡班(1024) → 心姐(2048) → 肥美(4096) → 姜爷(8192) → 韩总(16384) → 张亦哲(32768) → 王者淳(65536)</p>
+              <i class="fa fa-users text-primary dark:text-gray-300"></i>
+              <p class="font-inter dark:text-gray-300">人物等级：汪蔡(2) → 党哥(4) → 凯皇(8) → 百鸡(16) → 钊君(32) → 崇玉妹妹(64) → 熊易燃(128) → 小猪初初(256) → 马赫(512) → 胡班(1024) → 心姐(2048) → 肥美(4096) → 姜爷(8192) → 韩总(16384) → 张亦哲(32768) → 王者淳(65536)</p>
             </div>
             <div class="rule-item">
-              <i class="fa fa-info-circle text-primary"></i>
-              <p class="font-inter">网站维护：我们将不定时地更换网站的背景图，以提升用户体验</p>
+              <i class="fa fa-info-circle text-primary dark:text-gray-300"></i>
+              <p class="font-inter dark:text-gray-300">网站维护：我们将不定时地更换网站的背景图，以提升用户体验</p>
             </div>
           </div>
           
           <!-- 悔棋按钮 -->
-          <button id="undo-btn" class="mt-8 w-full bg-primary text-white py-2 px-4 rounded hover:bg-opacity-80 transition-colors font-inter">
+          <button id="undo-btn" class="mt-8 w-full bg-primary dark:bg-gray-700 text-white py-2 px-4 rounded hover:bg-opacity-80 transition-colors font-inter">
             <i class="fa fa-undo mr-2"></i>细品一下
           </button>
           
           <!-- 创作者信息 -->
-          <div class="mt-6 text-center text-black text-xs">
+          <div class="mt-6 text-center text-black dark:text-gray-300 text-xs">
             <p>创作者：王者淳</p>
             <p>吉祥物：王者淳的小猫花花</p>
           </div>
@@ -292,7 +367,7 @@
     
     <!-- 底部名言 -->
     <footer class="relative z-10 container mx-auto px-4 py-6 text-center">
-      <p class="text-lg text-gray-700 max-w-2xl mx-auto font-inter">让别人开心，这叫情商；让自己开心，那才是人生！</p>
+      <p class="text-lg text-gray-700 dark:text-gray-300 max-w-2xl mx-auto font-inter">让别人开心，这叫情商；让自己开心，那才是人生！</p>
     </footer>
   </div>
 
@@ -384,8 +459,14 @@
         this.messageText = document.getElementById('message-text');
         this.quoteText = document.getElementById('quote-text');
         this.tryAgainBtn = document.getElementById('try-again-btn');
-        this.continueBtn = document.getElementById('continue-btn');
         this.undoBtn = document.getElementById('undo-btn');
+        this.saveScreenshotBtn = document.getElementById('save-screenshot-btn');
+        this.themeToggle = document.getElementById('theme-toggle');
+        this.themeIcon = document.getElementById('theme-icon');
+        this.watermark = document.getElementById('watermark');
+
+        // 初始化水印
+        this.updateWatermark();
 
         // 初始化游戏
         this.setup();
@@ -393,7 +474,59 @@
         // 添加事件监听器
         this.setupEventListeners();
 
-        // 游戏初始化完成
+        // 初始化主题
+        this.initTheme();
+      }
+
+      // 初始化主题
+      initTheme() {
+        // 检查本地存储的主题设置
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark') {
+          document.documentElement.classList.add('dark');
+          this.themeIcon.className = 'fa fa-sun-o';
+        } else {
+          document.documentElement.classList.remove('dark');
+          this.themeIcon.className = 'fa fa-moon-o';
+        }
+      }
+
+      // 切换主题
+      toggleTheme() {
+        if (document.documentElement.classList.contains('dark')) {
+          document.documentElement.classList.remove('dark');
+          localStorage.setItem('theme', 'light');
+          this.themeIcon.className = 'fa fa-moon-o';
+        } else {
+          document.documentElement.classList.add('dark');
+          localStorage.setItem('theme', 'dark');
+          this.themeIcon.className = 'fa fa-sun-o';
+        }
+        this.updateWatermark();
+      }
+
+      // 更新水印
+      updateWatermark() {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        
+        this.watermark.textContent = `${year}年${month}月${day}日        wangzhechun.github.io        © 博远FJ 2048`;
+      }
+
+      // 显示截图通知
+      showScreenshotNotification() {
+        const notification = document.createElement('div');
+        notification.className = 'screenshot-notification';
+        notification.textContent = '截图已保存，游戏重新开始！';
+        
+        document.body.appendChild(notification);
+        
+        // 2秒后移除
+        setTimeout(() => {
+          notification.remove();
+        }, 2000);
       }
 
       // 初始化游戏
@@ -405,7 +538,7 @@
         // 创建固定的格子元素
         for (let i = 0; i < this.size * this.size; i++) {
           const tile = document.createElement('div');
-          tile.className = 'bg-white bg-opacity-20 rounded-lg flex items-center justify-center aspect-square';
+          tile.className = 'bg-white dark:bg-gray-800 bg-opacity-20 rounded-lg flex items-center justify-center aspect-square';
           this.gameBoard.appendChild(tile);
         }
 
@@ -434,8 +567,8 @@
         this.over = false;
         this.gameMessage.classList.remove('game-won', 'game-over');
         
-        // 重置已合成的角色记录
-        this.mergedCharacters = new Set();
+        // 重置已合成的角色记录 - 关键修复：确保新游戏提示重置
+        this.synthesizedLevels = new Set();
       }
 
       // 保存当前状态用于悔棋
@@ -490,7 +623,7 @@
         }
       }
 
-      // 预加载单个图片的通用方法
+      // 预加载单个图片的通用方法 - 优化版本
       preloadSingleImage(key, src) {
         // 检查是否已缓存相同源的图片
         if (this.imageCache[key] && this.imageCache[key].src === src) {
@@ -505,22 +638,58 @@
         // 创建新的加载Promise
         this.loadingPromises[key] = new Promise((resolve, reject) => {
           const img = new Image();
+          
+          // 条件性设置 crossOrigin
+          if (src.includes('gp3e.saobby.com')) {
+            img.crossOrigin = 'anonymous';
+          }
+          
+          // 添加超时处理
+          const timeout = setTimeout(() => {
+            reject(new Error(`Image load timeout: ${src}`));
+          }, 10000);
 
           img.onload = () => {
+            clearTimeout(timeout);
             this.imageCache[key] = img;
             delete this.loadingPromises[key];
             resolve(img);
           };
 
           img.onerror = () => {
+            clearTimeout(timeout);
             delete this.loadingPromises[key];
-            reject(new Error(`Failed to load image: ${src}`));
+            // 降级方案：不使用 crossOrigin 重试
+            this.fallbackImageLoad(key, src, resolve, reject);
           };
 
           img.src = src;
         });
 
         return this.loadingPromises[key];
+      }
+
+      // 降级加载方法 - 不使用 crossOrigin
+      fallbackImageLoad(key, src, resolve, reject) {
+        const img = new Image();
+        // 不设置 crossOrigin
+        
+        const timeout = setTimeout(() => {
+          reject(new Error(`Fallback image load timeout: ${src}`));
+        }, 10000);
+
+        img.onload = () => {
+          clearTimeout(timeout);
+          this.imageCache[key] = img;
+          resolve(img);
+        };
+        
+        img.onerror = () => {
+          clearTimeout(timeout);
+          reject(new Error(`Fallback also failed: ${src}`));
+        };
+        
+        img.src = src;
       }
 
       // 渲染棋盘
@@ -553,7 +722,7 @@
               let tileInner = tile.querySelector('.tile-inner');
               if (!tileInner) {
                 tileInner = document.createElement('div');
-                tileInner.className = 'tile-inner bg-white rounded-lg shadow-inner-lg';
+                tileInner.className = 'tile-inner bg-white dark:bg-gray-700 rounded-lg shadow-inner-lg';
                 tile.appendChild(tileInner);
               }
 
@@ -565,6 +734,12 @@
               if (!img) {
                 img = document.createElement('img');
                 img.alt = config.name;
+                
+                // 条件性设置 crossOrigin
+                if (newSrc.includes('gp3e.saobby.com')) {
+                  img.crossOrigin = 'anonymous';
+                }
+                
                 tileInner.appendChild(img);
               }
 
@@ -572,7 +747,7 @@
               let name = tileInner.querySelector('.name');
               if (!name) {
                 name = document.createElement('div');
-                name.className = 'name';
+                name.className = 'name dark:text-white';
                 tileInner.appendChild(name);
               }
 
@@ -602,8 +777,10 @@
                       img.src = cachedImg.src;
                       img.classList.add('loaded');
                     }
-                  }).catch(() => {
-                    // 图片加载失败时的处理
+                  }).catch((error) => {
+                    console.warn(`Failed to load image for ${value}:`, error);
+                    // 即使加载失败，也显示名称
+                    img.style.display = 'none';
                   });
                 } else {
                   // 预加载并缓存新图片
@@ -612,8 +789,10 @@
                       img.src = cachedImg.src;
                       img.classList.add('loaded');
                     }
-                  }).catch(() => {
-                    // 图片预加载失败时的处理
+                  }).catch((error) => {
+                    console.warn(`Failed to preload image for ${value}:`, error);
+                    // 即使预加载失败，也显示名称
+                    img.style.display = 'none';
                   });
                 }
               }
@@ -624,14 +803,14 @@
               tile.classList.add('tile-rendered');
 
               // 显示棋子
-              tile.classList.remove('bg-white', 'bg-opacity-20');
+              tile.classList.remove('bg-white', 'bg-opacity-20', 'dark:bg-gray-800');
             } else {
               // 清空标记和内容
               delete tile.dataset.value;
               delete tile.dataset.src;
               tile.classList.remove('tile-rendered');
               tile.innerHTML = '';
-              tile.className = 'bg-white bg-opacity-20 rounded-lg flex items-center justify-center aspect-square';
+              tile.className = 'bg-white dark:bg-gray-800 bg-opacity-20 rounded-lg flex items-center justify-center aspect-square';
             }
           }
         }
@@ -936,7 +1115,6 @@
         this.messageText.textContent = 'GAME OVER!';
         this.quoteText.textContent = '';
         this.gameMessage.classList.add('game-over');
-        this.continueBtn.classList.add('hidden');
       }
 
       // 显示合成提示
@@ -961,6 +1139,55 @@
             }, 500);
           }, 2000);
         }
+      }
+
+      // 保存终局图片
+      saveScreenshot() {
+        // 获取游戏容器元素
+        const gameContainer = document.querySelector('.game-container');
+        
+        // 使用html2canvas截图
+        html2canvas(gameContainer, {
+          useCORS: true, // 解决跨域图片问题
+          allowTaint: false,
+          backgroundColor: null, // 保持背景透明
+          scale: window.devicePixelRatio, // 提高截图质量
+          logging: false
+        }).then(canvas => {
+          // 创建画布上下文
+          const ctx = canvas.getContext('2d');
+          
+          // 添加水印
+          const now = new Date();
+          const year = now.getFullYear();
+          const month = String(now.getMonth() + 1).padStart(2, '0');
+          const day = String(now.getDate()).padStart(2, '0');
+          const watermarkText = `${year}年${month}月${day}日        wangzhechun.github.io        © 博远FJ 2048`;
+          
+          // 设置水印样式
+          ctx.font = '12px Inter, sans-serif';
+          ctx.fillStyle = document.documentElement.classList.contains('dark') ? 'rgba(255, 255, 255, 0.6)' : 'rgba(0, 0, 0, 0.6)';
+          ctx.textAlign = 'center';
+          
+          // 绘制水印
+          ctx.fillText(watermarkText, canvas.width / 2, canvas.height - 15);
+          
+          // 创建下载链接
+          const link = document.createElement('a');
+          link.href = canvas.toDataURL('image/png');
+          link.download = '博远FJ2048终局.png';
+          link.click();
+          
+          // 显示截图通知
+          this.showScreenshotNotification();
+          
+          // 直接重新开始游戏
+          this.setup();
+        }).catch(error => {
+          console.error('截图失败:', error);
+          // 即使失败也重新开始游戏
+          this.setup();
+        });
       }
 
       // 设置事件监听器
@@ -1039,14 +1266,19 @@
           this.setup();
         });
 
-        this.continueBtn.addEventListener('click', () => {
-          this.gameMessage.classList.remove('game-won');
-          this.won = false;
-        });
-
         // 悔棋按钮事件
         this.undoBtn.addEventListener('click', () => {
           this.undo();
+        });
+
+        // 保存终局图片按钮事件
+        this.saveScreenshotBtn.addEventListener('click', () => {
+          this.saveScreenshot();
+        });
+
+        // 主题切换按钮事件
+        this.themeToggle.addEventListener('click', () => {
+          this.toggleTheme();
         });
       }
     }
@@ -1057,4 +1289,5 @@
     });
   </script>
 
-</body></html>
+</body>
+</html>
