@@ -175,16 +175,24 @@
         color: #333;
         font-weight: bold;
         cursor: pointer;
-        transition: background 0.2s ease;
+        transition: all 0.2s ease;
         font-family: 'Inter', sans-serif;
         border: none;
         box-shadow: 0 4px 6px rgba(0,0,0,0.1);
       }
       .game-message button:hover {
         background: #f0f0f0;
+        transform: translateY(-2px);
       }
       .game-message button:active {
-        transform: translateY(2px);
+        transform: translateY(0);
+      }
+      .dark .game-message button {
+        background: white;
+        color: #333;
+      }
+      .dark .game-message button:hover {
+        background: #e0e0e0;
       }
       .ink-stroke {
         position: relative;
@@ -210,20 +218,6 @@
       }
       .dark .rule-item i {
         color: #ddd;
-      }
-      .watermark {
-        position: absolute;
-        bottom: 10px;
-        left: 50%;
-        transform: translateX(-50%);
-        font-size: 12px;
-        color: rgba(0, 0, 0, 0.6);
-        z-index: 20;
-        font-family: 'Inter', sans-serif;
-        white-space: nowrap;
-      }
-      .dark .watermark {
-        color: rgba(255, 255, 255, 0.6);
       }
       .theme-toggle {
         position: absolute;
@@ -297,8 +291,6 @@
         <!-- 游戏棋盘区 -->
         <div class="relative">
           <div class="game-container glass-effect dark:glass-effect-dark rounded-lg p-8 shadow-lg border-2 border-gray-200 dark:border-gray-700 relative" style="box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.1);">
-            <!-- 水印 -->
-            <div class="watermark" id="watermark"></div>
             
             <div class="grid grid-cols-4 gap-8 bg-white dark:bg-gray-800 bg-opacity-70 dark:bg-opacity-70 rounded-md p-8" id="game-board" style="max-width: 700px; width: 100%; aspect-ratio: 1/1; margin: 0 auto;">
               <!-- 棋盘格子将通过JS动态生成 -->
@@ -323,7 +315,7 @@
               <div class="message" id="message-text">游戏胜利!</div>
               <div class="quote" id="quote-text">你获得了胜利！</div>
               <div class="flex gap-4 justify-center">
-                <button id="try-again-btn" class="bg-primary dark:bg-gray-700 text-white hover:bg-opacity-80">再试一次</button>
+                <button id="try-again-btn" class="bg-white text-gray-800 hover:bg-gray-100">再试一次</button>
                 <button id="save-screenshot-btn" class="bg-blue-500 text-white hover:bg-blue-600">保存终局图片</button>
               </div>
             </div>
@@ -463,10 +455,6 @@
         this.saveScreenshotBtn = document.getElementById('save-screenshot-btn');
         this.themeToggle = document.getElementById('theme-toggle');
         this.themeIcon = document.getElementById('theme-icon');
-        this.watermark = document.getElementById('watermark');
-
-        // 初始化水印
-        this.updateWatermark();
 
         // 初始化游戏
         this.setup();
@@ -502,17 +490,6 @@
           localStorage.setItem('theme', 'dark');
           this.themeIcon.className = 'fa fa-sun-o';
         }
-        this.updateWatermark();
-      }
-
-      // 更新水印
-      updateWatermark() {
-        const now = new Date();
-        const year = now.getFullYear();
-        const month = String(now.getMonth() + 1).padStart(2, '0');
-        const day = String(now.getDate()).padStart(2, '0');
-        
-        this.watermark.textContent = `${year}年${month}月${day}日        wangzhechun.github.io        © 博远FJ 2048`;
       }
 
       // 显示截图通知
@@ -1150,9 +1127,40 @@
         html2canvas(gameContainer, {
           useCORS: true, // 解决跨域图片问题
           allowTaint: false,
-          backgroundColor: null, // 保持背景透明
-          scale: window.devicePixelRatio, // 提高截图质量
-          logging: false
+          backgroundColor: '#f3f4f6', // 设置背景色
+          scale: 2, // 提高截图质量
+          logging: false,
+          width: gameContainer.offsetWidth,
+          height: gameContainer.offsetHeight,
+          onclone: function(clonedDoc) {
+            // 在克隆的文档中确保所有图片都加载完成
+            const images = clonedDoc.querySelectorAll('img');
+            let loadedCount = 0;
+            const totalImages = images.length;
+            
+            return new Promise((resolve) => {
+              if (totalImages === 0) {
+                resolve();
+                return;
+              }
+              
+              images.forEach(img => {
+                if (img.complete) {
+                  loadedCount++;
+                  if (loadedCount === totalImages) resolve();
+                } else {
+                  img.onload = () => {
+                    loadedCount++;
+                    if (loadedCount === totalImages) resolve();
+                  };
+                  img.onerror = () => {
+                    loadedCount++;
+                    if (loadedCount === totalImages) resolve();
+                  };
+                }
+              });
+            });
+          }
         }).then(canvas => {
           // 创建画布上下文
           const ctx = canvas.getContext('2d');
@@ -1165,12 +1173,12 @@
           const watermarkText = `${year}年${month}月${day}日        wangzhechun.github.io        © 博远FJ 2048`;
           
           // 设置水印样式
-          ctx.font = '12px Inter, sans-serif';
-          ctx.fillStyle = document.documentElement.classList.contains('dark') ? 'rgba(255, 255, 255, 0.6)' : 'rgba(0, 0, 0, 0.6)';
+          ctx.font = '14px Inter, sans-serif';
+          ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
           ctx.textAlign = 'center';
           
           // 绘制水印
-          ctx.fillText(watermarkText, canvas.width / 2, canvas.height - 15);
+          ctx.fillText(watermarkText, canvas.width / 2, canvas.height - 20);
           
           // 创建下载链接
           const link = document.createElement('a');
