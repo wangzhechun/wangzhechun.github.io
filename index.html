@@ -293,7 +293,7 @@
             <div class="victory-card bg-white dark:bg-gray-800 bg-opacity-90 dark:bg-opacity-90 p-8 rounded-lg shadow-xl max-w-md">
               <div class="message" id="message-text">游戏胜利!</div>
               <div class="quote" id="quote-text">你获得了胜利！</div>
-              <button id="try-again-btn" class="bg-white text-gray-800 hover:bg-gray-100">再试一次</button>
+              <button id="try-again-btn" class="bg-white text-gray-800 hover:bg-gray-100">再来一次</button>
             </div>
           </div>
         </div>
@@ -1046,9 +1046,8 @@
         // 没有空格子且没有可合并的棋子，游戏结束
         this.over = true;
         
-        // 关键修复：游戏结束时清空当前得分
-        this.score = 0;
-        this.scoreDisplay.textContent = this.score;
+        // 关键修改：游戏结束时不再清空当前得分
+        // 只在点击"再来一次"按钮时重置分数
         
         this.messageText.textContent = 'GAME OVER!';
         this.quoteText.textContent = '';
@@ -1152,7 +1151,7 @@
 
         // 按钮事件
         this.tryAgainBtn.addEventListener('click', () => {
-          this.setup();
+          this.setup(); // 点击"再来一次"时重置游戏，包括分数
         });
 
         // 悔棋按钮事件
