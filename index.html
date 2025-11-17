@@ -239,126 +239,6 @@
       .theme-toggle:hover {
         transform: scale(1.1);
       }
-      /* 兑换码按钮样式 */
-      .redeem-code-btn {
-        position: absolute;
-        right: 50px;
-        top: 0;
-        height: 40px;
-        padding: 0 15px;
-        border-radius: 20px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        background: rgba(255, 255, 255, 0.7);
-        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        font-size: 14px;
-        font-weight: 500;
-      }
-      .dark .redeem-code-btn {
-        background: rgba(0, 0, 0, 0.7);
-        color: white;
-      }
-      .redeem-code-btn:hover {
-        transform: scale(1.05);
-      }
-      /* 兑换码弹窗样式 */
-      .redeem-modal {
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0, 0, 0, 0.5);
-        z-index: 1000;
-        justify-content: center;
-        align-items: center;
-      }
-      .redeem-modal.active {
-        display: flex;
-      }
-      .redeem-modal-content {
-        background-color: white;
-        dark:bg-gray-800;
-        padding: 20px;
-        border-radius: 10px;
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-        width: 90%;
-        max-width: 400px;
-        text-align: center;
-        animation: modalAppear 0.3s ease-out;
-      }
-      @keyframes modalAppear {
-        from {
-          opacity: 0;
-          transform: translateY(-50px);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
-      }
-      .redeem-modal h3 {
-        margin-bottom: 20px;
-        font-size: 20px;
-        color: #333;
-        dark:text-white;
-      }
-      .redeem-modal input {
-        width: 100%;
-        padding: 10px;
-        margin-bottom: 15px;
-        border: 1px solid #ddd;
-        dark:border-gray-600;
-        border-radius: 5px;
-        font-size: 16px;
-        background-color: white;
-        dark:bg-gray-700;
-        color: #333;
-        dark:text-white;
-      }
-      .redeem-modal-buttons {
-        display: flex;
-        justify-content: center;
-        gap: 10px;
-      }
-      .redeem-modal button {
-        padding: 10px 20px;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-        font-size: 16px;
-        transition: all 0.2s ease;
-      }
-      .redeem-confirm-btn {
-        background-color: #4CAF50;
-        color: white;
-      }
-      .redeem-confirm-btn:hover {
-        background-color: #45a049;
-      }
-      .redeem-cancel-btn {
-        background-color: #f44336;
-        color: white;
-      }
-      .redeem-cancel-btn:hover {
-        background-color: #d32f2f;
-      }
-      .redeem-success {
-        color: #4CAF50;
-        font-weight: bold;
-        margin-top: 15px;
-        display: none;
-      }
-      .redeem-error {
-        color: #f44336;
-        font-weight: bold;
-        margin-top: 15px;
-        display: none;
-      }
     }
   </style>
 </head>
@@ -378,10 +258,6 @@
             <span class="text-lg font-['Ma_Shan_Zheng'] text-red-800 dark:text-red-400">者淳</span>
           </div>
           <h1 class="text-3xl md:text-4xl font-inter text-primary dark:text-white">博远FJ 2048</h1>
-          <!-- 兑换码按钮 -->
-          <div class="redeem-code-btn" id="redeem-code-btn">
-            兑换码
-          </div>
           <div class="theme-toggle" id="theme-toggle">
             <i class="fa fa-moon-o" id="theme-icon"></i>
           </div>
@@ -463,20 +339,6 @@
     </footer>
   </div>
 
-  <!-- 兑换码弹窗 -->
-  <div class="redeem-modal" id="redeem-modal">
-    <div class="redeem-modal-content dark:bg-gray-800">
-      <h3 class="dark:text-white">输入兑换码</h3>
-      <input type="text" id="redeem-code-input" placeholder="请输入兑换码">
-      <div class="redeem-modal-buttons">
-        <button class="redeem-confirm-btn" id="redeem-confirm-btn">确认</button>
-        <button class="redeem-cancel-btn" id="redeem-cancel-btn">取消</button>
-      </div>
-      <div class="redeem-success" id="redeem-success">兑换成功！</div>
-      <div class="redeem-error" id="redeem-error">兑换码无效！</div>
-    </div>
-  </div>
-
   <script>
     // 角色配置表
     const characterConfig = {
@@ -556,7 +418,6 @@
         this.previousState = null; // 用于悔棋
         this.over = false;
         this.synthesizedLevels = new Set(); // 记录已合成的等级
-        this.redeemCount = 0; // 记录兑换次数，每局游戏重置
 
         // 初始化DOM元素
         this.gameBoard = document.getElementById('game-board');
@@ -569,15 +430,6 @@
         this.undoBtn = document.getElementById('undo-btn');
         this.themeToggle = document.getElementById('theme-toggle');
         this.themeIcon = document.getElementById('theme-icon');
-        
-        // 兑换码相关元素
-        this.redeemCodeBtn = document.getElementById('redeem-code-btn');
-        this.redeemModal = document.getElementById('redeem-modal');
-        this.redeemCodeInput = document.getElementById('redeem-code-input');
-        this.redeemConfirmBtn = document.getElementById('redeem-confirm-btn');
-        this.redeemCancelBtn = document.getElementById('redeem-cancel-btn');
-        this.redeemSuccess = document.getElementById('redeem-success');
-        this.redeemError = document.getElementById('redeem-error');
 
         // 初始化游戏
         this.setup();
@@ -634,9 +486,6 @@
         // 重置分数
         this.score = 0;
         
-        // 重置兑换次数
-        this.redeemCount = 0;
-        
         // 更新分数显示
         this.scoreDisplay.textContent = this.score;
         this.bestScoreDisplay.textContent = this.bestScore;
@@ -664,8 +513,7 @@
       saveState() {
         this.previousState = {
           board: JSON.parse(JSON.stringify(this.board)),
-          score: this.score,
-          redeemCount: this.redeemCount // 保存兑换次数
+          score: this.score
         };
       }
 
@@ -674,7 +522,6 @@
         if (this.previousState) {
           this.board = this.previousState.board;
           this.score = this.previousState.score;
-          // 不恢复兑换次数，确保兑换记录不会被撤回
           this.scoreDisplay.textContent = this.score;
           this.renderBoard();
           this.previousState = null; // 只能悔棋一次
@@ -702,42 +549,15 @@
         }
         return false;
       }
-      
-      // 添加指定值的棋子到随机位置
-      addSpecificTile(value) {
-        // 获取所有空格子
-        const emptyTiles = [];
-        for (let i = 0; i < this.size; i++) {
-          for (let j = 0; j < this.size; j++) {
-            if (this.board[i][j] === 0) {
-              emptyTiles.push({ x: i, y: j });
-            }
-          }
-        }
 
-        // 如果有空格子，随机选择一个并放置指定值的棋子
-        if (emptyTiles.length > 0) {
-          const randomTile = emptyTiles[Math.floor(Math.random() * emptyTiles.length)];
-          this.board[randomTile.x][randomTile.y] = value;
-          return true;
-        }
-        return false;
-      }
-
-      // 预加载图片 - 只预加载初始可能出现的图片
+      // 预加载所有图片
       preloadImages() {
         this.imageCache = {};
         this.loadingPromises = {};
 
-        // 只预加载初始游戏中可能出现的图片（2和4）
-        this.preloadSingleImage('2', characterConfig[2].image);
-        this.preloadSingleImage('4', characterConfig[4].image);
-        
-        // 预加载其他图片的占位符，实际加载将在需要时进行
+        // 预加载默认角色图片
         for (const key in characterConfig) {
-          if (key !== '2' && key !== '4') {
-            this.imageCache[key] = null; // 占位符，表示尚未加载
-          }
+          this.preloadSingleImage(key, characterConfig[key].image);
         }
       }
 
@@ -825,8 +645,7 @@
               // 检查是否已有相同值的棋子内容
               const existingValue = tile.dataset.value;
               const existingSrc = tile.dataset.src;
-              const config = characterConfig[value];
-              const newSrc = config.image;
+              const newSrc = characterConfig[value].image;
 
               if (existingValue === value.toString() && existingSrc === newSrc) {
                 // 棋子值和图片源都相同，跳过重新渲染
@@ -844,6 +663,9 @@
                 tileInner.className = 'tile-inner bg-white dark:bg-gray-700 rounded-lg shadow-inner-lg';
                 tile.appendChild(tileInner);
               }
+
+              // 获取角色配置
+              const config = characterConfig[value];
 
               // 获取或创建图片元素
               let img = tileInner.querySelector('img');
@@ -867,11 +689,53 @@
                 tileInner.appendChild(name);
               }
 
-              // 设置名称（立即显示，无需等待图片加载）
-              name.textContent = config.name;
+              // 智能图片加载 - 使用缓存优先策略避免闪烁
+              const currentSrc = img.getAttribute('data-current-src');
 
-              // 智能图片加载 - 优化版
-              this.loadImageForTile(value, img, newSrc);
+              // 检查缓存中是否已有该图片
+              if (this.imageCache[value] && this.imageCache[value].src === newSrc) {
+                // 直接使用缓存的图片,无需淡入动画
+                if (currentSrc !== newSrc) {
+                  img.setAttribute('data-current-src', newSrc);
+                  img.src = this.imageCache[value].src;
+                }
+                // 确保图片立即可见
+                if (!img.classList.contains('loaded')) {
+                  img.classList.add('loaded');
+                }
+              } else if (currentSrc !== newSrc) {
+                // 只有在源改变时才重新加载
+                img.setAttribute('data-current-src', newSrc);
+                img.classList.remove('loaded');
+
+                if (this.loadingPromises[value]) {
+                  // 图片正在加载中，等待加载完成
+                  this.loadingPromises[value].then((cachedImg) => {
+                    if (img.getAttribute('data-current-src') === newSrc) {
+                      img.src = cachedImg.src;
+                      img.classList.add('loaded');
+                    }
+                  }).catch((error) => {
+                    console.warn(`Failed to load image for ${value}:`, error);
+                    // 即使加载失败，也显示名称
+                    img.style.display = 'none';
+                  });
+                } else {
+                  // 预加载并缓存新图片
+                  this.preloadSingleImage(value, newSrc).then((cachedImg) => {
+                    if (img.getAttribute('data-current-src') === newSrc) {
+                      img.src = cachedImg.src;
+                      img.classList.add('loaded');
+                    }
+                  }).catch((error) => {
+                    console.warn(`Failed to preload image for ${value}:`, error);
+                    // 即使预加载失败，也显示名称
+                    img.style.display = 'none';
+                  });
+                }
+              }
+
+              name.textContent = config.name;
 
               // 标记为已渲染
               tile.classList.add('tile-rendered');
@@ -888,98 +752,6 @@
             }
           }
         }
-      }
-      
-      // 为棋子加载图片的优化方法
-      loadImageForTile(value, imgElement, src) {
-        const currentSrc = imgElement.getAttribute('data-current-src');
-        
-        // 如果源相同且图片已加载，不做任何操作
-        if (currentSrc === src && imgElement.classList.contains('loaded')) {
-          return;
-        }
-        
-        // 更新当前源
-        imgElement.setAttribute('data-current-src', src);
-        
-        // 检查缓存中是否已有该图片
-        if (this.imageCache[value] && this.imageCache[value] instanceof Image && this.imageCache[value].complete) {
-          // 使用缓存的图片
-          imgElement.src = this.imageCache[value].src;
-          imgElement.classList.add('loaded');
-          return;
-        }
-        
-        // 如果图片正在加载中，等待加载完成
-        if (this.loadingPromises[value]) {
-          this.loadingPromises[value].then(() => {
-            if (imgElement.getAttribute('data-current-src') === src) {
-              imgElement.src = this.imageCache[value].src;
-              imgElement.classList.add('loaded');
-            }
-          }).catch((error) => {
-            console.warn(`Failed to load image for ${value}:`, error);
-            // 加载失败时显示占位符
-            this.showImagePlaceholder(imgElement, value);
-          });
-          return;
-        }
-        
-        // 如果图片尚未加载，开始加载
-        if (this.imageCache[value] === null) {
-          // 显示加载占位符
-          this.showImagePlaceholder(imgElement, value);
-          
-          // 开始加载图片
-          this.preloadSingleImage(value, src).then(() => {
-            if (imgElement.getAttribute('data-current-src') === src) {
-              imgElement.src = this.imageCache[value].src;
-              imgElement.classList.add('loaded');
-            }
-          }).catch((error) => {
-            console.warn(`Failed to load image for ${value}:`, error);
-            // 加载失败时保持占位符
-            this.showImagePlaceholder(imgElement, value);
-          });
-        }
-      }
-      
-      // 显示图片加载占位符
-      showImagePlaceholder(imgElement, value) {
-        imgElement.style.display = 'block';
-        imgElement.classList.remove('loaded');
-        // 使用颜色占位符代替图片
-        imgElement.style.width = '70px';
-        imgElement.style.height = '70px';
-        imgElement.style.backgroundColor = this.getColorForValue(value);
-        imgElement.style.borderRadius = '4px';
-        imgElement.style.display = 'flex';
-        imgElement.style.alignItems = 'center';
-        imgElement.style.justifyContent = 'center';
-        imgElement.style.color = 'white';
-        imgElement.style.fontSize = '24px';
-        imgElement.style.fontWeight = 'bold';
-        
-        // 如果图片已经有src，清除它
-        if (imgElement.src) {
-          imgElement.src = '';
-        }
-      }
-      
-      // 根据值获取颜色占位符
-      getColorForValue(value) {
-        // 使用哈希函数生成一致的颜色
-        const colors = [
-          '#eee4da', '#ede0c8', '#f2b179', '#f59563', 
-          '#f67c5f', '#f65e3b', '#edcf72', '#edcc61',
-          '#edc850', '#edc53f', '#edc22e', '#3c3a32',
-          '#66ccff', '#99ff99', '#ffcc99', '#ff99cc'
-        ];
-        
-        // 计算索引，确保相同值总是得到相同颜色
-        const log2 = Math.log2(value);
-        const index = Math.min(Math.floor(log2) - 1, colors.length - 1);
-        return colors[index];
       }
 
       // 移动棋子
@@ -1305,77 +1077,6 @@
           }, 2000);
         }
       }
-      
-      // 验证兑换码
-      validateRedeemCode(code) {
-        // 特殊情况：张亦哲的兑换码
-        if (code === "王者淳的小猫花花") {
-          return 32768; // 张亦哲对应的值
-        }
-        
-        // 检查是否以"博远FJ2048"开头
-        if (!code.startsWith("博远FJ2048")) {
-          return null;
-        }
-        
-        // 提取角色名称
-        const characterName = code.substring("博远FJ2048".length);
-        
-        // 查找对应的角色值
-        for (const [value, config] of Object.entries(characterConfig)) {
-          // 排除王者淳和张亦哲
-          if (parseInt(value) === 65536 || parseInt(value) === 32768) {
-            continue;
-          }
-          
-          if (config.name === characterName) {
-            return parseInt(value);
-          }
-        }
-        
-        return null;
-      }
-      
-      // 处理兑换码
-      handleRedeemCode() {
-        const code = this.redeemCodeInput.value.trim();
-        const value = this.validateRedeemCode(code);
-        
-        // 隐藏提示信息
-        this.redeemSuccess.style.display = 'none';
-        this.redeemError.style.display = 'none';
-        
-        // 检查兑换次数限制
-        if (this.redeemCount >= 1) {
-          this.redeemError.textContent = '同局游戏内无法再次兑换！';
-          this.redeemError.style.display = 'block';
-          return;
-        }
-        
-        if (value) {
-          // 保存当前状态用于悔棋
-          this.saveState();
-          
-          // 添加指定角色到棋盘
-          if (this.addSpecificTile(value)) {
-            this.renderBoard();
-            this.redeemSuccess.style.display = 'block';
-            this.redeemCount++; // 增加兑换次数
-            
-            // 2秒后关闭弹窗
-            setTimeout(() => {
-              this.redeemModal.classList.remove('active');
-              this.redeemCodeInput.value = '';
-            }, 2000);
-          } else {
-            this.redeemError.textContent = '棋盘已满，无法添加新角色！';
-            this.redeemError.style.display = 'block';
-          }
-        } else {
-          this.redeemError.textContent = '兑换码无效！';
-          this.redeemError.style.display = 'block';
-        }
-      }
 
       // 设置事件监听器
       setupEventListeners() {
@@ -1461,34 +1162,6 @@
         // 主题切换按钮事件
         this.themeToggle.addEventListener('click', () => {
           this.toggleTheme();
-        });
-        
-        // 兑换码按钮事件
-        this.redeemCodeBtn.addEventListener('click', () => {
-          this.redeemModal.classList.add('active');
-          this.redeemCodeInput.value = '';
-          this.redeemSuccess.style.display = 'none';
-          this.redeemError.style.display = 'none';
-        });
-        
-        // 兑换码确认按钮事件
-        this.redeemConfirmBtn.addEventListener('click', () => {
-          this.handleRedeemCode();
-        });
-        
-        // 兑换码取消按钮事件
-        this.redeemCancelBtn.addEventListener('click', () => {
-          this.redeemModal.classList.remove('active');
-          this.redeemCodeInput.value = '';
-          this.redeemSuccess.style.display = 'none';
-          this.redeemError.style.display = 'none';
-        });
-        
-        // 兑换码输入框回车事件
-        this.redeemCodeInput.addEventListener('keypress', (e) => {
-          if (e.key === 'Enter') {
-            this.handleRedeemCode();
-          }
         });
       }
     }
